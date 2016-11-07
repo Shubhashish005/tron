@@ -1,49 +1,94 @@
+<style>
+a:hover {
+	cursor:pointer;
+}
+.dropzone {
+	border: 2px dashed;
+}
+.hcolmn {
+	background-color: #eee;
+	width:200px;
+}
+</style>
+
 <div class="row">
 	<div class="container">
-		<h2 style="color: #bf3e11">Create Application Patch</h2>
+		<h4 style="color: #bf3e11">Create Application Patchs</h4>
 		<hr/>
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<form class="form-horizontal" role="form">
+				<div class="col-md-6">
+				
 				  <div class="form-group">
-				    <label class="control-label col-sm-2" for="desc">Name:</label>
-				    <div class="col-sm-4">
+				  	<label class="control-label col-sm-4" for="type">Type:</label>
+				  	<div class="col-sm-6">
+				  		<select ng-model="patch.type" class="form-control">
+				  			<option>ENH</option>
+				  			<option>INT</option>
+				  			<option>CM</option>
+				  		</select>
+				  	</div>
+				  </div>				
+				
+				  <div class="form-group" style="display:none">
+				    <label class="control-label col-sm-4" for="desc">Name:</label>
+				    <div class="col-sm-6">
 				      <input type="text" ng-model="patch.name" class="form-control" id="name" placeholder="Package Name">
 				    </div>
-				  </div>				
+				  </div>
+				  				
 				  <div class="form-group">
-				    <label class="control-label col-sm-2" for="desc">Description:</label>
-				    <div class="col-sm-4">
-				      <input type="text" ng-model="patch.desc" class="form-control" id="desc" placeholder="Description">
+				    <label class="control-label col-sm-4" for="desc">Description:</label>
+				    <div class="col-sm-6">
+				      <input type="text" ng-model="patch.desc" class="form-control" id="desc" placeholder="Description" required>
 				    </div>
 				  </div>
+				  
 				  <div class="form-group">
-				    <label class="control-label col-sm-2" for="env">Environment:</label>
-				    <div class="col-sm-4"> 
+				    <label class="control-label col-sm-4" for="module">Module:</label>
+				    <div class="col-sm-6">
+				      <input type="text" ng-model="patch.module" class="form-control" id="desc" placeholder="Module">
+				    </div>
+				  </div>
+				  
+				  <div class="form-group">
+				    <label class="control-label col-sm-4" for="version">Version:</label>
+				    <div class="col-sm-6">
+				      <input type="text" ng-model="patch.version" class="form-control" id="desc" placeholder="Version">
+				    </div>
+				  </div>
+				  
+				  <div class="form-group">
+				    <label class="control-label col-sm-4" for="env">Environment:</label>
+				    <div class="col-sm-6"> 
 				      <select ng-model="patch.env" class="form-control" name="env" ng-options="x.envName for x in environments"></select>
 				      <!-- input type="text" ng-model="patch.env" class="form-control" id="env" placeholder="Environment"-->
 				    </div>
 				  </div>
 				  <div class="form-group">
-				    <label class="control-label col-sm-2" for="dest">Destination:</label>
-				    <div class="col-sm-4"> 
+				    <label class="control-label col-sm-4" for="dest">Destination:</label>
+				    <div class="col-sm-6"> 
 				      <input type="text" ng-model="patch.dest" class="form-control" id="dest" placeholder="Destination">
 				    </div>
 				  </div>	
 				  <div class="form-group">
-				    <label class="control-label col-sm-2" for="createdBy">Created By:</label>
-				    <div class="col-sm-4"> 
+				    <label class="control-label col-sm-4" for="createdBy">Created By:</label>
+				    <div class="col-sm-6"> 
 				      <input type="text" ng-model="patch.createdBy" class="form-control" id="createdBy" placeholder="Created By">
 				    </div>
 				  </div>	
 				  <div class="form-group"> 
-				    <div class="col-sm-offset-2 col-sm-4">
+				    <div class="col-sm-offset-4 col-sm-6">
 				      <div class="checkbox">
-				        <label><input type="checkbox" ng-true-value="'Y'" ng-false-value="'N'" ng-model="patch.hasAppPatch">Has Application Patch</label>
+				        <label><input type="checkbox" ng-true-value="'Y'" ng-false-value="'N'" ng-model="patch.hasAppPatch">Has Application Component</label>
 				      </div>
 				      <div class="checkbox">
-				        <label><input type="checkbox" ng-true-value="'Y'" ng-false-value="'N'" ng-model="patch.hasDbPatch">Has Database Patch</label>
-				      </div>				      
+				        <label><input type="checkbox" ng-true-value="'Y'" ng-false-value="'N'" ng-model="patch.hasDbPatch">Has Database Component</label>
+				      </div>	
+				      <div class="checkbox">
+				        <label><input type="checkbox" ng-true-value="'Y'" ng-false-value="'N'" ng-model="patch.hasBundle">Has Bundle</label>
+				      </div>
 				    </div>
 				  </div>
 				  <div class="form-group"> 
@@ -51,6 +96,76 @@
 				      <button type="submit" ng-click="proceed()" class="btn btn-default">Proceed</button>
 				    </div>
 				  </div>
+				 </div>
+				 <div class="col-md-6">
+				 	<h4>Prerequisites</h4> <hr/>
+				 	 <div class="col-sm-6">
+				 		 <div class="checkbox">
+				 	 		<label><input type="checkbox" ng-true-value="'Y'" ng-false-value="'N'" ng-model="patch.hasPrereq">Has Prerequisites</label>
+				 	 	</div>
+				 	 </div>
+				 	 <div class="col-sm-6">
+				 		 <div class="checkbox">
+				 	 		<label><input type="checkbox" ng-true-value="'Y'" ng-false-value="'N'" ng-model="patch.includePrereq" ng-click="patch.hasPrereq = 'Y'">Include Prerequisites</label>
+				 	 	</div>
+				 	 </div>	
+					 
+				 	 <div style="margin-top:10px;" class="col-sm-12" ng-show="patch.hasPrereq == 'Y'">
+				 	 	<table class="table">
+				 	 		<tr>
+				 	 			<th>
+				 	 				<div class="btn-group" role="group" aria-label="...">
+										<button type="button" class="btn btn-sm btn-default"
+											ng-click="addPreq(-1)">
+											<i class="fa fa-plus"></i>
+										</button>
+										<button type="button" class="btn btn-sm btn-default"
+											ng-click="removePreq(-1)">
+											<i class="fa fa-minus"></i>
+										</button>
+									</div>
+								</th>
+				 	 			<th>Package Name</th>
+				 	 		</tr>
+				 	 		<tr ng-repeat="prereq in prereqs">
+				 	 			<td width="78px">
+									<div class="btn-group" role="group" aria-label="...">
+										<button type="button" class="btn btn-sm btn-default"
+											ng-click="addPreq($index)">
+											<i class="fa fa-plus"></i>
+										</button>
+										<button type="button" class="btn btn-sm btn-default"
+											ng-click="removePreq($index)">
+											<i class="fa fa-minus"></i>
+										</button>
+									</div>
+								</td>
+								<td>
+									<input type="text" class="form-control input-sm" ng-model="prereq.packageName"/>
+								</td>
+				 	 		</tr>
+				 	 	</table>
+				 	 </div>	<!-- Hidden Div for Prereq list ends here -->	
+				 	 <div style="margin-top:10px;"  class="col-sm-12" ng-show="patch.includePrereq == 'Y'">
+				 	 	<div flow-init="{target: '/file-upload'}" flow-name="pre.flow"
+						     flow-files-submitted="$flow.upload()"
+						     flow-file-added="handleFileAdd($file, $event, $flow)"
+						     flow-file-success="$file.msg = $message">
+						  
+						  <div class="alert alert-warning dropzone" flow-drop>
+							    Drag And Drop your Prerequisites here or click upload button <span class="btn btn-primary" flow-btn>Upload File</span>
+						  </div>
+						  <table class="table table-striped">
+						    <tr ng-repeat="file in $flow.files">
+						        <td>{{$index+1}}</td>
+						        <td>{{file.name}}</td>
+						        <td>{{file.msg}}</td>
+						        <td><button class="btn btn-sm btn-primary" ng-click="deleteFromServer($flow.files, file)"><i class="fa fa-times"></i></button></td>
+						    </tr>
+						  </table>
+						</div>
+				 	 </div> 	 
+				 </div>
 				</form>				
 			</div>
 		</div>

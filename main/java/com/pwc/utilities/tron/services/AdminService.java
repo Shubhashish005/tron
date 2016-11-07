@@ -1,12 +1,22 @@
 package com.pwc.utilities.tron.services;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import com.pwc.utilities.tron.model.entity.Dashboard;
 import com.pwc.utilities.tron.model.entity.DbObj;
 import com.pwc.utilities.tron.model.entity.Environment;
 import com.pwc.utilities.tron.model.entity.InstallRecord;
+import com.pwc.utilities.tron.model.entity.Notification;
 import com.pwc.utilities.tron.model.entity.Patch;
 import com.pwc.utilities.tron.model.entity.PatchApp;
 import com.pwc.utilities.tron.model.entity.PatchDb;
+import com.pwc.utilities.tron.model.entity.Prerequisite;
 import com.pwc.utilities.tron.model.entity.ServicePack;
 
 
@@ -35,7 +45,7 @@ public interface AdminService {
 	void deletePatchDB(Integer patchId);
 	void deletePatchDB(PatchDb patchDB);
 	
-	Iterable<PatchApp> getAllPatchApp();
+	Iterable<PatchApp> getAllPatchApp(Patch patch);
 	PatchApp getPatchApp(Integer patchId);
 	PatchApp addPatchApp(PatchApp patchId);
 	void deletePatchApp(Integer patchId);
@@ -59,6 +69,24 @@ public interface AdminService {
 	
 	public void createNewEnvironment(String dbHost, int dbPort, String dbPswd, String dbUser, String dbSid,	String envName, String envPath, String envVer, String project);
 	
+	Iterable<Prerequisite> getAllPrereqs();
+	Iterable<Prerequisite> getAllPrereqs(Integer patchId);
+	Prerequisite addPrerequisite(Prerequisite prerequisite);
+	void deletePrerequisites(Integer patchId);
 	
+	void applyPrereq(String packageName, Environment environment) throws IOException, InterruptedException;
+	void applyPackage(String packageName, Environment environment) throws IOException;
+	void applyBlueprint(String packageName, Environment environment) throws IOException, InterruptedException;
+	void unzip(String packageName);
 	
+	Iterable<Notification> getAllNotifications();
+	void deleteAllNotifications();
+	Notification createNotification(String message, String status);
+	Notification updateNotification(Notification notification);
+	
+	Map<String, List<HashMap<String, String>>> retreiveSysTableLst(String app);
+	void createCodePackage(List<Map<String, String>> fileDetails, File envPath, File file, Patch patch);
+	
+	void zipFolder(String srcFolder, String destZipFile) throws Exception;
+	void applySP(String spName, Environment environment) throws IOException, InterruptedException;
 }

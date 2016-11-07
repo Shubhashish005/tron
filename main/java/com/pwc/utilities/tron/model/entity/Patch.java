@@ -36,12 +36,28 @@ public class Patch extends BaseEntity {
 	@Column(name = "isDbIncl")
 	private String isDbIncl;
 	
+	@Column(name = "isBundleIncl")
+	private String isBundleIncl;
+	
+	@Column(name = "isPreReqIncl")
+	private String isPreReqIncl;
+	
 	@Column(name = "destLoc")
 	private String dest;
 	
 	@Column(name = "name")
 	private String name;
 	
+	@Column(name = "type")
+	private String type;
+	
+	@Column(name = "moduleNbr")
+	private String moduleNbr;
+	
+	@Column(name = "version")
+	private String version;
+	
+
 	@Column(name = "createdBy")
 	private String createdBy;
 	
@@ -54,6 +70,9 @@ public class Patch extends BaseEntity {
 	@OneToMany(mappedBy = "patch", cascade = CascadeType.ALL)
 	protected Set<PatchDb> patchDbs;
 
+	@OneToMany(mappedBy = "patch", cascade = CascadeType.ALL)
+	protected Set<PatchApp> patchApp;
+	
 	public Environment getEnv() {
 		return env;
 	}
@@ -135,5 +154,46 @@ public class Patch extends BaseEntity {
 	public void setDest(String dest) {
 		this.dest = dest;
 	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getIsBundleIncl() {
+		return isBundleIncl;
+	}
+
+	public void setIsBundleIncl(String isBundleIncl) {
+		this.isBundleIncl = isBundleIncl;
+	}
+
+	public String getIsPreReqIncl() {
+		return isPreReqIncl;
+	}
+
+	public void setIsPreReqIncl(String isPreReqIncl) {
+		this.isPreReqIncl = isPreReqIncl;
+	}
+
+	public String getModuleNbr() {
+		return moduleNbr;
+	}
+
+	public void setModuleNbr(String moduleNbr) {
+		this.moduleNbr = moduleNbr;
+	}
+	
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+	
 
 }

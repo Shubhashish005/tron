@@ -35,7 +35,7 @@ a:hover {
 							<tr><th>File</th><th>Path</th></tr>
 							<tr ng-repeat="f in selectedFiles">
 								<td>{{f.file}}</td>
-								<td>{{f.folder}}</td>
+								<td>{{f.path}}</td>
 							</tr>
 						</table>
 					</uib-tab>
@@ -47,7 +47,7 @@ a:hover {
 					<uib-tab index="3" heading="Upload Documents">
 						<p>&nbsp;</p>
 						<h4>Upload Documents</h4>
-						<div flow-init="{target: '/upload'}"
+						<div flow-init="{target: '/file-upload'}"
 						     flow-files-submitted="$flow.upload()"
 						     flow-file-success="$file.msg = $message">
 						  
@@ -66,7 +66,7 @@ a:hover {
 				</uib-tabset>	
 			</div>
 		</div>
-		<div class="row text-center"><button class="btn btn-primary"><i class="fa fa-download"></i> Download Package</button></div>
+		<div class="row text-center"><a href="/patches/download-package" class="btn btn-primary"><i class="fa fa-download"></i> Download Package</a></div>
 		
 	</div>
 </div>

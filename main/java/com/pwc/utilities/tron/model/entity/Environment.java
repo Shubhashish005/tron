@@ -12,6 +12,9 @@ import javax.persistence.Table;
 public class Environment extends BaseEntity {
 
 
+	@Column(name = "product")
+	private String product;
+	
 	@Column(name = "project")
 	private String project;
 	
@@ -39,6 +42,9 @@ public class Environment extends BaseEntity {
 	@Column(name = "env_path")
 	private String envPath;
 
+	@Column(name = "path_to_packages")
+	private String pathToPackages;
+	
 	public String getProject() {
 		return project;
 	}
@@ -110,7 +116,22 @@ public class Environment extends BaseEntity {
 	public void setEnvPath(String envPath) {
 		this.envPath = envPath;
 	}
-	
+
+	public String getPathToPackages() {
+		return pathToPackages;
+	}
+
+	public void setPathToPackages(String pathToPackages) {
+		this.pathToPackages = pathToPackages;
+	}
+
+	public String getProduct() {
+		return product;
+	}
+
+	public void setProduct(String product) {
+		this.product = product;
+	}
 	
 	
 

@@ -5,7 +5,7 @@
 		<div class="row">
 			<div class="col-lg-5">
 				<div class="panel panel-default">
-					<div class="panel-body" style="min-height: 400px; overflow: scroll">
+					<div class="panel-body" style="min-height: 400px; max-height:400px; overflow: scroll">
 						<div js-tree="treeConfig" ng-model="treeModelLeft"
 							should-apply="applyModelChanges()" tree="treeInstanceOne"
 							tree-events="ready:readyCB;select_node:selectNodeCB"></div>
@@ -18,17 +18,18 @@
 						ng-click="moveRight()">
 						<i class="fa fa-arrow-right"></i>
 					</button>
-					<button type="button" class="btn btn-default">
+					
+					<button type="button" class="btn btn-default" ng-click="moveLeft()">
 						<i class="fa fa-arrow-left"></i>
 					</button>
 				</div>
 			</div>
 			<div class="col-lg-5">
 				<div class="panel panel-default">
-					<div class="panel-body" style="min-height: 400px; overflow: scroll">
+					<div class="panel-body" style="min-height: 400px; max-height:400px; overflow: scroll">
 						<div js-tree="treeConfig" ng-model="treeModelRight"
 							should-apply="applyModelChanges()" tree="treeInstanceTwo"
-							tree-events="ready:readyCB;create_node:createNodeCB"></div>
+							tree-events="ready:readyCB;select_node:selectRightNodeCB;create_node:createNodeCB"></div>
 					</div>
 				</div>
 			</div>
@@ -37,5 +38,6 @@
 			<button ng-click="proceed()" class="btn btn-primary">Proceed</button>
 			<button ng-click="goBack()"  class="btn btn-primary">Cancel</button>
 		</div>
+		<p></p>
 	</div>
 </div>

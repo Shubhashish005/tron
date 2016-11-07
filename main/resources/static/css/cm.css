@@ -7,8 +7,10 @@
 html {
 	height: 100%;
 	/*Image only BG fallback*/
-	background-color: #E0E0E0;
+	background-color: #F2F2F2;
 	z-index: -2; 
+	/*border-left: 100px solid white;
+	border-right: 100px solid white;*/
 }
 
 body {
@@ -131,7 +133,9 @@ body {
 
 
 .navbar-default {
-	background-color: #da022a;
+	/*background-color: #da022a;*/
+	background: linear-gradient(to bottom,#c10000 0,#f00 100%);
+	
 }
 .btn-primary {
 	background-color: #da022a;
@@ -139,4 +143,9 @@ body {
 
 td {
 	text-align: left;
+}
+
+.dropdown-menu > li > a.disabled {
+	color: #E2E2E2;
+	pointer-events: none;
 }

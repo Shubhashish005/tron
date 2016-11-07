@@ -15,10 +15,20 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @Table(name = "APP_OBJ_TYPE_FLG")
-public class AppObjTypeFlg implements java.io.Serializable {
+public class AppObjTypeFlg extends BaseEntity {
 	/**
 	 * 
 	 */
+	
+	@Column(name = "APP_OBJ_TYPE")
+	@NotEmpty
+	private String appObjType;
+	
+	@Column(name = "DESCRIPTION")
+	@NotEmpty
+	private String description;
+	
+	/*
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -76,4 +86,5 @@ public class AppObjTypeFlg implements java.io.Serializable {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	*/
 }

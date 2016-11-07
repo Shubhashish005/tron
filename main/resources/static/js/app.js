@@ -105,13 +105,65 @@ tronApp.controller('DBPatchController', function($scope, $window, $location, $ht
 });
 
 
-tronApp.controller('CreatePatchController', function($scope, $rootScope, $location, $http){
+tronApp.controller('CreatePatchController', function($scope, $rootScope, $location, $http, toastr){
 	
 	$scope.environments = null;
+	
+	$scope.prereqs = [];
+	$scope.prer = {};
 	
 	$http.get("/environments").success(function(data, status){
 		$scope.environments = data;
 	});
+	
+    $scope.addPreq = function(index){
+	    console.log("Adding Prequ");
+	    var prereq = {};
+	    prereq.packageName = "";
+	    $scope.prereqs.splice(index+1,0, prereq);
+    }; 
+    
+    $scope.removePreq = function(index){
+	    $scope.prereqs.splice(index, 1);
+	}; 
+
+	$scope.handleFileAdd = function ($file, $event, $flow) {
+		  console.log("flow...");
+		  console.log($file.file.name);
+		  //console.log(flowFile.d.files[0].file.name);
+		  var prereq = {};
+		  prereq.packageName = $file.file.name;
+		 $scope.prereqs.push(prereq);
+	};
+
+	$scope.deleteFromServer = function($files, file) {
+		//console.log($files);
+		console.log(file);
+		$http.post('/delete-prereq',{
+			fileName: file.name
+		}).success(function(data, status, header) {
+
+		var found = false;
+		for (i = 0; i < $scope.prereqs.length; i++) {
+			if ($scope.prereqs[i].packageName == file.name) {
+				found = true;
+				break;
+			}
+		}
+
+		if (found) {
+			$scope.prereqs.splice(i, 1);
+		}
+
+		index = $files.indexOf(file);
+		if (index > -1)
+			$files.splice(index, 1);
+			toastr.success('File Deleted from the Server!', 'Alert!');
+		});
+		
+
+		
+	}
 	
 	$scope.proceed = function() {
 		
@@ -119,20 +171,31 @@ tronApp.controller('CreatePatchController', function($scope, $rootScope, $locati
 		
 		$http.post('/patches', {
 			id   : $scope.patch.id,
-			name : $scope.patch.name,
+			name : $scope.patch.type+$scope.patch.module+"."+$scope.patch.version,
 			desc : $scope.patch.desc,
 			dest : $scope.patch.dest,
 			env  : $scope.patch.env,
 			createdBy : $scope.patch.createdBy,
 			isAppIncl : $scope.patch.hasAppPatch,
-			isDbIncl : $scope.patch.hasDbPatch,
-			status   : 'Created'
+			isDbIncl  : $scope.patch.hasDbPatch,
+			isBundleIncl : $scope.patch.hasBundle,
+			moduleNbr    : $scope.patch.module,
+			version      : $scope.patch.version,
+			type         : $scope.patch.type,
+			status       : 'Created'
 		}).success(function(data, status, header){
 			$scope.patch = data;
 			$rootScope.patch = data;
+			
+			$http.post('/patches/add-prereq', {
+				data: $scope.prereqs
+			}).success(function(data, status, header){
+				console.log("Records Inserted");
+			});
+			
 		});
 		
-		
+	
 		if($scope.patch.hasAppPatch)
 			$location.path('/apppatch');
 		else if($scope.patch.hasDbPatch)
@@ -140,10 +203,12 @@ tronApp.controller('CreatePatchController', function($scope, $rootScope, $locati
 	}
 });
 
-tronApp.controller('AppPatchController', function($scope, $rootScope, $location, $window){
+tronApp.controller('AppPatchController', function($scope, $rootScope, $location, $window, $http){
 	
 	
 	$scope.selectedNode = null;
+	$scope.selectedRightNode = null;
+	
 	$scope.treeConfig = {
             core : {
                 multiple : false,
@@ -157,7 +222,63 @@ tronApp.controller('AppPatchController', function($scope, $rootScope, $location,
             version : 1
         };
 	
+	
 	$scope.treeModelLeft = [{
+		"id"     :"code",
+		"parent" :"#",
+		"text"   :"code"
+	},{
+		"id"     : "cobol",
+		"parent" : "code",
+		"text"   : "cobol"
+	},{
+		"id"     : "etc",
+		"parent" : "code",
+		"text"   : "etc"
+	},{
+		"id"     : "java",
+		"parent" : "code",
+		"text"   : "java"
+	},{
+		"id"     : "services",
+		"parent" : "code",
+		"text"   : "services"
+	},{
+		"id"     : "splapp",
+		"parent" : "code",
+		"text"   : "splapp"
+	}];
+	
+	
+	$scope.treeModelRight = [{
+		"id"     :"code",
+		"parent" :"#",
+		"text"   :"code"
+	},{
+		"id"     : "cobol",
+		"parent" : "code",
+		"text"   : "cobol"
+	},{
+		"id"     : "etc",
+		"parent" : "code",
+		"text"   : "etc"
+	},{
+		"id"     : "java",
+		"parent" : "code",
+		"text"   : "java"
+	},{
+		"id"     : "services",
+		"parent" : "code",
+		"text"   : "services"
+	},{
+		"id"     : "splapp",
+		"parent" : "code",
+		"text"   : "splapp"
+	}];
+	
+	
+	
+	$scope.treeModelLeft3 = [{
 		  "id": "cm",
 		  "parent": "#",
 		  "text": "cm"
@@ -216,7 +337,7 @@ tronApp.controller('AppPatchController', function($scope, $rootScope, $location,
 				},			
 		];
 	
-	$scope.treeModelRight = [{
+	$scope.treeModelRight3 = [{
 		  "id": "cm",
 		  "parent": "#",
 		  "text": "cm"
@@ -254,16 +375,135 @@ tronApp.controller('AppPatchController', function($scope, $rootScope, $location,
 		$scope.selectedNode = list.node;
 		console.log('Pushed Value..');
 		
+		$http.post("/list-files", {path:list.node.id}).success(function(data, status){
+			
+			var i = $scope.treeModelLeft.length;
+			while (i--){
+				if($scope.treeModelLeft[i].parent == list.node.id) {
+					$scope.treeModelLeft.splice(i, 1);
+			    }
+			}
+			
+		
+			angular.forEach(data, function(fileObj){
+				console.log(fileObj);
+				$scope.treeModelLeft.push(fileObj);
+			});
+		});
+		
+		
 	};
 	
 	$scope.moveRight = function() {
-		$scope.treeModelRight.push($scope.selectedNode);
+		
+		$http.post("/parents-childerns", {path:$scope.selectedNode.id}).success(function(data, status){
+			
+			var i = data.length;
+			
+			while(i--) {
+				fileObj = data[i];
+				console.log(fileObj);
+				var nodeFound = false;
+				angular.forEach($scope.treeModelRight, function(rightNode){
+					if(rightNode.id == fileObj.id) {
+						nodeFound = true;
+						console.log("Node Found...");
+					}
+				});
+				if(!nodeFound) {
+					console.log('Adding node to Right');
+					$scope.treeModelRight.push(fileObj);
+				}				
+			}
+			
+			setTimeout(function(){
+				console.log("Tree Instance");
+				console.log($scope.treeInstanceTwo);
+				$scope.treeInstanceTwo.jstree(true).open_all();				
+			},500);	
+
+			
+		});
+		
+
+		//$scope.treeModelRight.push($scope.selectedNode);
+		//$scope.reCreateTree();
 	};
+	
+	$scope.selectRightNodeCB = function(e, list){
+		$scope.selectedRightNode = list.node;
+		console.log(list.node);
+	}
+	
+	$scope.moveLeft = function() {
+		
+		/*
+		console.log('Going to Remove');
+		console.log($scope.selectedRightNode.id);
+		console.log($scope.selectedRightNode.children_d);
+		*/
+		//Remove all Childrens First
+		angular.forEach($scope.selectedRightNode.children_d, function (childNode) {
+			console.log(childNode);
+			angular.forEach($scope.treeModelRight, function(rightNode){
+			if(rightNode.id == childNode || rightNode.id == $scope.selectedRightNode.id)
+				{
+					var index = $scope.treeModelRight.indexOf(rightNode);
+					console.log('Going to Remove >>>'+index);
+					if (index > -1) {
+						console.log('Going to Remove '+index);
+						$scope.treeModelRight.splice(index, 1);
+					}	
+				}
+			})
+		});
+		
+		//Remove Self If no Childern are present
+		angular.forEach($scope.treeModelRight, function(rightNode){
+			if(rightNode.id == $scope.selectedRightNode.id)
+				{
+					var index = $scope.treeModelRight.indexOf(rightNode);
+					console.log('Going to Remove >>>'+index);
+					if (index > -1) {
+						console.log('Going to Remove '+index);
+						$scope.treeModelRight.splice(index, 1);
+					}	
+				}
+		});		
+
+	}
+	
+	$scope.treeConfig = {
+		    core : {
+		        multiple : false,
+		        animation: true,
+		        error : function(error) {
+		            $log.error('treeCtrl: error from js tree - ' + angular.toJson(error));
+		        },
+		        check_callback : true,
+		        worker : true
+		    },
+		    version : 1
+		};
+		$scope.reCreateTree = function() {
+		    this.treeConfig.version++;
+		}
+	
 	
 	$scope.proceed = function() {
 		console.log('I am in');
+		
+		$http.post('/app-objects', {
+			data: $scope.treeModelRight
+		}).success(function(data, status, header){
+			console.log("Records Inserted");
+		});
+		console.log("APP >>>"+$rootScope.patch.hasDbPatch);
 		if($rootScope.patch.hasDbPatch)
 			$location.path('/dbpatch');
+		else
+			$location.path('/review');
+			
 	}
 	
 	$scope.goBack = function() {
@@ -273,7 +513,25 @@ tronApp.controller('AppPatchController', function($scope, $rootScope, $location,
 });
 
 
-tronApp.controller('ReviewController', function($scope, $rootScope, $location){
+tronApp.controller('ReviewController', function($scope,$http, $rootScope, $location){
+	
+	$scope.getPatch = function() {
+		$http.get('/patches/details').success(function(data, status){
+			$scope.patch = data;
+		});
+		
+		$http.get('/app-objects').success(function(data, status){
+			$scope.selectedFiles = data;
+		});
+	}
+	
+	$scope.createAndDownloadZip = function() {
+		$http.post('/patches/download-package').success(function(data, status){
+			
+		});
+	};
+	
+	$scope.getPatch();
 	
 	$scope.inputFileUrl = function(){
 		return '../storage/'+$rootScope.patch.name+'/input.inp';
@@ -304,6 +562,7 @@ tronApp.controller('AppObjectTypeController', function($scope, $rootScope,
 	});
 
 });
+
 tronApp.controller('EnvironementeController', function($scope, $rootScope,
 		$http, $location, $confirm, $window,hexafy, toastr) {
 
@@ -317,6 +576,16 @@ tronApp.controller('EnvironementeController', function($scope, $rootScope,
 			$scope.environments = environments;
 		});		
 	};
+	
+	$scope.updateEnvironment = function updateEnvironment(environment){
+		$scope.environment = environment;
+		$('#myModal').modal('toggle');
+	}
+	
+	$scope.addEnvironment = function addEnvironment(){
+		$scope.environment = null;
+		$('#myModal').modal('toggle');
+	}
 	
 	//initail load
 	$scope.loadData();
@@ -349,6 +618,123 @@ tronApp.controller('EnvironementeController', function($scope, $rootScope,
 	}
 
 });
+
+tronApp.controller('ApplyPatchController', function($scope, $http, $interval, toastr) {
+	
+	$scope.environments = null;
+	$scope.environment = null;
+	$scope.packageList = [];
+	$scope.applying = false;
+	$scope.isPackageExist = false;
+	
+	$scope.notifications = [];
+	
+	
+	
+	$http.get("/environments").success(function(data, status){
+		$scope.environments = data;
+	});
+	
+	$scope.setEnv = function(environment){
+		$http.post('/environment/set', $scope.env).success(function(data, status, headers){
+			$scope.environment = data;
+		});
+	};
+	
+	$scope.handleFileAdd = function ($file, $event, $flow) {
+		  console.log("flow...");
+		  console.log($file.file.name);
+		  var release = {};
+		  release.fileName = $file.file.name;
+		  $scope.packageList.push(release);
+		  
+		  $http.post('/apply-package/check-package', release.fileName).success(function(data, status, headers) {
+			  $scope.isPackageExist = data.FileExist;
+		  });
+	};
+	
+	$scope.checkStatus = function () {
+		
+		if($scope.applying) {
+			$http.get('/apply-package/status').success(function(data, status, headers) {
+				$scope.notifications = data
+			});
+		}
+	}
+	
+	$scope.applyPatch =  function(){
+		$scope.applying = true;
+		
+		$interval(function(){
+			$scope.checkStatus();
+		}, 3000);
+		
+		$http.post('/apply-package', $scope.packageList).success(function(data, status, headers) {
+			
+			$http.get('/apply-package/status').success(function(data, status, headers){
+				$scope.notifications = data
+			});
+			$scope.applying = false;
+		}).error(function(data){
+			toastr.error(data.message,"Error! ");
+		});
+	};
+	
+});
+
+tronApp.controller('ApplyServicePackController', function($scope, $http, $interval, toastr){
+	$scope.environments = null;
+	$scope.environment = null;
+	$scope.packageList = [];
+	$scope.applying = false;
+	$scope.isPackageExist = false;
+	$scope.notifications = [];
+	
+	$http.get("/environments").success(function(data, status){
+		$scope.environments = data;
+	});
+	
+	$scope.setEnv = function(environment){
+		$http.post('/environment/set', $scope.env).success(function(data, status, headers){
+			$scope.environment = data;
+		});
+	};	
+
+	$scope.handleFileAdd = function ($file, $event, $flow) {
+		  var release = {};
+		  release.fileName = $file.file.name;
+		  $scope.packageList.push(release);
+	};	
+	
+	$scope.checkStatus = function () {		
+		if($scope.applying) {
+			$http.get('/apply-package/status').success(function(data, status, headers) {
+				$scope.notifications = data
+			});
+		}
+	};	
+	
+	$scope.applySP =  function(){
+		$scope.applying = true;
+		
+		$interval(function(){
+			$scope.checkStatus();
+		}, 3000);
+		
+		$http.post('/apply-package/service-pack', $scope.packageList).success(function(data, status, headers) {
+			
+			$http.get('/apply-package/status').success(function(data, status, headers){
+				$scope.notifications = data
+			});
+			$scope.applying = false;
+		}).error(function(data){
+			toastr.error(data.message, 'Error!');
+			$scope.applying = false;
+		});
+	};	
+	
+});
+
 
 tronApp.service('hexafy', function() {
     this.myFunc = function (x) {
@@ -435,6 +821,14 @@ tronApp.config(function($routeProvider) {
 	.when('/apppatch', {
 		templateUrl: './pages/apppatch.html',
 		controller: 'AppPatchController'
+	})	
+	.when('/applypatch', {
+		templateUrl: './pages/applypatch.html',
+		controller: 'ApplyPatchController'
+	})
+	.when('/applysp', {
+		templateUrl: './pages/applysp.html',
+		controller: 'ApplyServicePackController'
 	})	
 	.when('/review', {
 		templateUrl: './pages/review.html',

@@ -6,9 +6,7 @@
 		<div class="panel panel-default">
 
 			<div class="panel-body">
-				<input type="button" class="btn btn-primary pull-right"
-				data-toggle="modal" data-target="#myModal"
-				value="Configure Environment" style="margin-bottom:20px;">
+				<input type="button" class="btn btn-primary pull-right"	ng-click="addEnvironment()"	value="Add Environment" style="margin-bottom:20px;">
 			
 				<table  class="table table-striped">
 					<tr>
@@ -32,8 +30,12 @@
 						<td>{{environment.dbSid}}</td>
 						<td>{{environment.dbUser}}</td>
 						<td>{{environment.envVer}}</td>
-						<td><input type="button" class="btn btn-primary pull-right"
-							value="Delete" ng-click="deleteEnvironment(environment)"></td>
+						<td>
+							<div class="btn-group" role="group" aria-label="...">
+							  <button type="button" class="btn btn-default" ng-click="deleteEnvironment(environment)"><i class="fa fa-trash"></i></button>
+							  <button type="button" class="btn btn-default" ng-click="updateEnvironment(environment)"><i class="fa fa-list-alt"></i></button>
+							</div>
+						</td>
 					</tr>
 				</table>
 			</div>
@@ -47,12 +49,23 @@
 					</div>
 					<div class="modal-body">
 						<form class="form-horizontal" role="form">
+						
+							<div class="form-group">
+								<label class="control-label col-sm-4" for="email">Product</label>
+								<div class="col-sm-8">
+									<select class="form-control" ng-model="environment.product">
+										<option>CCB</option>
+										<option>RMB</option>
+									</select>
+								</div>
+							</div>
+							
 							<div class="form-group">
 								<label class="control-label col-sm-4" for="email">Project
 									Name</label>
 								<div class="col-sm-8">
 									<input type="text" class="form-control" name="a" id="a"
-										ng-model="environment.project" placeholder="Enter email">
+										ng-model="environment.project" placeholder="Project Name">
 								</div>
 							</div>
 							<div class="form-group">
@@ -60,7 +73,7 @@
 									Name</label>
 								<div class="col-sm-8">
 									<input type="text" class="form-control" name="b" id="b"
-										ng-model="environment.envName" placeholder="Enter email">
+										ng-model="environment.envName" placeholder="Env. Name">
 								</div>
 							</div>
 							<div class="form-group">
@@ -68,14 +81,14 @@
 									Version</label>
 								<div class="col-sm-8">
 									<input type="text" class="form-control" id="email"
-										ng-model="environment.envVer" placeholder="Enter email">
+										ng-model="environment.envVer" placeholder="Env. Version">
 								</div>
 							</div>
 							<div class="form-group">
 								<label class="control-label col-sm-4" for="email">Hostname</label>
 								<div class="col-sm-8">
 									<input type="text" class="form-control" id="email"
-										ng-model="environment.dbHost" placeholder="Enter email">
+										ng-model="environment.dbHost" placeholder="Hostname">
 								</div>
 							</div>
 							<div class="form-group">
@@ -83,28 +96,28 @@
 									Port</label>
 								<div class="col-sm-8">
 									<input type="text" class="form-control" id="ee"
-										ng-model="environment.dbPort" placeholder="Enter email">
+										ng-model="environment.dbPort" placeholder="DB Port">
 								</div>
 							</div>
 							<div class="form-group">
 								<label class="control-label col-sm-4" for="email">SID</label>
 								<div class="col-sm-8">
 									<input type="text" class="form-control" id="emaddil"
-										ng-model="environment.dbSid" placeholder="Enter email">
+										ng-model="environment.dbSid" placeholder="SID">
 								</div>
 							</div>
 							<div class="form-group">
 								<label class="control-label col-sm-4" for="email">USername</label>
 								<div class="col-sm-8">
 									<input type="text" class="form-control" id="sss"
-										ng-model="environment.dbUser" placeholder="Enter email">
+										ng-model="environment.dbUser" placeholder="Username">
 								</div>
 							</div>
 							<div class="form-group">
 								<label class="control-label col-sm-4" for="email">Password</label>
 								<div class="col-sm-8">
 									<input type="password" class="form-control" id="email"
-										ng-model="environment.dbPswd" placeholder="Enter email">
+										ng-model="environment.dbPswd" placeholder="Password">
 								</div>
 							</div>
 							<div class="form-group">
@@ -112,9 +125,16 @@
 									Path</label>
 								<div class="col-sm-8">
 									<input type="text" class="form-control" id="email"
-										ng-model="environment.envPath" placeholder="Enter email">
+										ng-model="environment.envPath" placeholder="Env. Path">
 								</div>
 							</div>
+							<div class="form-group">
+								<label class="control-label col-sm-4" for="email">Path to Packages</label>
+								<div class="col-sm-8">
+									<input type="text" class="form-control" id="email"
+										ng-model="environment.pathToPackages" placeholder="Path to Packages">
+								</div>
+							</div>							
 							<div class="modal-footer">
 								<button type="button" class="btn btn-warning"
 									ng-click="saveEnvironment()">Save</button>

@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.pwc.utilities.tron.model.entity.Environment;
+import com.pwc.utilities.tron.model.entity.Notification;
 import com.pwc.utilities.tron.model.entity.Patch;
 import com.pwc.utilities.tron.model.entity.PatchDb;
 import com.pwc.utilities.tron.services.AdminService;
@@ -43,7 +46,7 @@ public class DBObjectController {
 	@RequestMapping(method = RequestMethod.POST)
 	public String generateBluePrint(@RequestBody Map<String, List<Map<String, List<Map<String, String>>>>> payload, HttpServletRequest request) {
 
-		Path pathToOracle = Paths.get("Oracle").toAbsolutePath();
+		Path pathToOracle = Paths.get("tools/Oracle").toAbsolutePath();
 		Path storagePath  = Paths.get("storage").toAbsolutePath();
 		
 		Patch patch = (Patch) request.getSession().getAttribute("patch");
@@ -53,7 +56,7 @@ public class DBObjectController {
 		try {
 			
 			// Create Package folder if not existing
-			File file = new File(storagePath+File.separator+patch.getName());
+			File file = new File(storagePath+File.separator+patch.getName()+File.separator+"Blueprint");
 			if (!file.exists()) {
 				if (file.mkdir()) {
 					logger.info(">>> Package Created under "+file);
@@ -65,9 +68,11 @@ public class DBObjectController {
 			}
 			
 			
-			File inpFile = new File(storagePath+File.separator+"input.inp");
-			File inpListFile = new File(storagePath+File.separator+"input-list.inp");
-			File logFile = new File(storagePath+File.separator+"output.log");
+			File inpFile = new File(file+File.separator+"input.inp");
+			File inpListFile = new File(file+File.separator+"input-list.inp");
+			File logFile = new File(file+File.separator+"output.log");
+			
+			logger.info("Creating BluePrint File under path >>> "+inpFile);
 			
 			PrintWriter inpFileWriter = new PrintWriter(inpFile);
 			PrintWriter inpListFileWriter = new PrintWriter(inpListFile);
@@ -113,7 +118,7 @@ public class DBObjectController {
 					seqNo = seqNo.add(BigDecimal.TEN);
 					
 				}
-				inpFileWriter.println("");
+				//inpFileWriter.println("");
 				//inpFileWriter.println("########################################################################");
 				//inpListFileWriter.println("########################################################################");
 			}
@@ -121,12 +126,29 @@ public class DBObjectController {
 			inpFileWriter.close();
 			inpListFileWriter.close();
 			
+			Environment environment = patch.getEnv();
 			
-			ProcessBuilder pb = new ProcessBuilder(pathToOracle+File.separator+"CM-extract.bat",storagePath+File.separator+"input.inp",storagePath+File.separator+"blueprint");
+			long timestamp = new Date().getTime();
+			String scriptName = "extractBlueprint"+timestamp+".cmd";
+			
+		
+			File scriptFile = new File(pathToOracle+File.separator+scriptName);
+			PrintWriter scriptFileWriter = new PrintWriter(scriptFile);
+			scriptFileWriter.println("set PATH=%cd%\\OracleClient32Bit;%PATH%;");
+			scriptFileWriter.println("set SID="+environment.getDbSid());
+			scriptFileWriter.println("set CISADM_USER="+environment.getDbUser());
+			scriptFileWriter.println("set CISADM_PSWD="+environment.getDbPswd());
+			scriptFileWriter.println("set NLS_LANG=AL32UTF8");
+			scriptFileWriter.println("set CM_OWNER=CM");
+			scriptFileWriter.println("OraSDBp.exe -d %CISADM_USER%,%CISADM_PSWD%,%SID% -i %1 -o %2 -c %NLS_LANG%");
+			scriptFileWriter.close();
+			
+			
+			ProcessBuilder pb = new ProcessBuilder(pathToOracle+File.separator+scriptName,file+File.separator+"input.inp",file+File.separator+"blueprint");
 			pb.directory(new File(pathToOracle.toString()));
-			//pb.redirectOutput(new File(pathToOracle+File.separator+"out.log"));
-			pb.redirectError(new File(storagePath+File.separator+"error.log"));
 			Process process = pb.start();
+			process.waitFor();			
+			
 			
 			final BufferedReader wr = new BufferedReader(new InputStreamReader(process.getInputStream()));
 	        final BufferedWriter writer = new BufferedWriter(
@@ -139,10 +161,13 @@ public class DBObjectController {
 	        logFileWriter.close();
 			process.waitFor();
 			
+			if(scriptFile.exists())
+				scriptFile.delete();
+			
 		} 
 		catch (IOException e) 
 		{		
-			logger.error(e.getMessage());
+			logger.error("IO Error Happned"+e.getMessage());
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
@@ -150,73 +175,14 @@ public class DBObjectController {
 		{
 			
 		}
-		
 		return null;
 	}
 	
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public Map<String, List<HashMap<String, String>>> retreive() {
-		
-		BufferedReader bufferedReader = null;
-		logger.info(Paths.get("storage").toAbsolutePath());
-		Map<String, List<HashMap<String, String>>> dbStore =  new HashMap<String, List<HashMap<String,String>>>();
-		try 
-		{
-			bufferedReader = new BufferedReader(new FileReader(Paths.get("storage").toAbsolutePath()+File.separator+"systables.lst"));
-			StringBuilder sb = new StringBuilder();
-            String line = bufferedReader.readLine();
-            String key = null;
-            List<HashMap<String, String>> storeVals = null;
-            while (line != null) {
-                if (line.startsWith("#$")) {
-                    line = line.replace('#', ' ');
-                    line = line.replace('$', ' ');
-
-                    if (key != null) {
-                        dbStore.put(key, storeVals);
-                    }
-                    key = line.trim();
-                    //storeVals = new ArrayList<String>();
-                    storeVals = new ArrayList<HashMap<String,String>>();
-                    //storeVals.add(key);
-                } else if ((!line.startsWith("##") && key != null)) {
-                    line = line.replace('#', ' ');
-                    line = line.replace('$', ' ');
-                    String value = line.trim();
-                    //storeVals.add(value + ";");
-                    String values[] = value.split(";");
-                    HashMap<String, String> myMap = new HashMap<String, String>();
-                    logger.info(values[0]);
-                    myMap.put("table", values[0]);
-                    myMap.put("condition", values[1]);
-                    myMap.put("exclution", values[2]);
-                    myMap.put("inSw", "T");
-                    myMap.put("upSw", "T");
-                    myMap.put("dlSw", "F");
-                    myMap.put("frSw", "T");
-                    myMap.put("objName", key);
-                    storeVals.add(myMap);
-                    
-                    
-                    //System.out.println("\""+key+"\",\""+value+"\"");
-                }
-                line = bufferedReader.readLine();
-            }
-            logger.info(storeVals);
-            logger.info("--------------------");
-            logger.info(dbStore);
-            
-		} 
-		catch (FileNotFoundException e) 
-		{
-			logger.error("systabled.lst File not found in the path "+Paths.get("storage").toAbsolutePath());
-		} 
-		catch (IOException e) 
-		{
-			e.printStackTrace();
-		}
-		return dbStore;
+	public Map<String, List<HashMap<String, String>>> retreive(HttpServletRequest request) {
+		Patch patch = (Patch) request.getSession().getAttribute("patch");
+		return adminService.retreiveSysTableLst(patch.getEnv().getProduct());
 		
 	}
 	
