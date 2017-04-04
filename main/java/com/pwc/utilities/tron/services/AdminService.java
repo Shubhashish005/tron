@@ -24,7 +24,7 @@ public interface AdminService {
 	
 	Iterable<Environment> getAllEnvironemnts();
 	Environment getEnvironment(Integer envID);
-	Environment addEnvironment(Environment environment);
+	Environment addEnvironment(Environment environment) throws Exception;
 	void deleteEnvironment(Environment environment);
 	void deleteEnvironment(Integer envId);
 	

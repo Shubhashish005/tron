@@ -20,7 +20,7 @@ public class EnvironmentController {
 	private AdminService adminService;
 
 	@RequestMapping(value = "/environments", method = RequestMethod.POST)
-	public Environment createNewEnvironment(@RequestBody Environment environment) {
+	public Environment createNewEnvironment(@RequestBody Environment environment) throws Exception {
 		//System.out.println(environment.getEnvName());
 		return adminService.addEnvironment(environment);
 	}

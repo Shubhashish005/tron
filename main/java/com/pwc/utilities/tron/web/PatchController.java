@@ -48,6 +48,11 @@ public class PatchController {
 		  return adminService.getPatches();
 	}	
 	
+	@RequestMapping(value = "unset", method = {RequestMethod.GET})
+	public void unsetSession(HttpServletRequest request){
+		request.getSession().removeAttribute("patch");
+	}
+	
 	@RequestMapping(value = "/download-package", method = {RequestMethod.GET})
 	public ResponseEntity<InputStreamResource> downloadPatch(HttpServletRequest request) throws Exception {
 		Patch patch = (Patch) request.getSession().getAttribute("patch");
@@ -73,6 +78,45 @@ public class PatchController {
 	public Patch getDetails(HttpServletRequest request) {
 		Patch patch = (Patch) request.getSession().getAttribute("patch");
 		return adminService.getPatch(patch.getId());
+	}
+	
+	
+	@RequestMapping(value = "/add-bundle", method = {RequestMethod.POST})
+	public Map<String, String> addBundle(@RequestBody Map<String, List<Map<String, String>>> payload, HttpServletRequest request){
+	
+		Patch patch = (Patch) request.getSession().getAttribute("patch");
+		List<Map<String, String>> bundles = payload.get("data");
+		Path storagePath  = Paths.get("storage").toAbsolutePath();
+		
+		//Loops Through each Prereqs and Moves Files If Uploaded.
+		// Create Package folder if not existing
+		File file = new File(storagePath+File.separator+patch.getName()+File.separator+"Bundle");
+		if (!file.exists()) {
+			if (file.mkdirs()) {
+				logger.info(">>> Package Created under "+file);
+				//storagePath = file.toPath();
+			}
+			else {
+				logger.error(">> Couldnot create folder "+file);
+			}
+		}
+		
+		for (Map<String, String> map : bundles) {
+
+			
+			File bundle = new File(storagePath+File.separator+map.get("fileName"));
+			logger.info("Source>>> "+bundle);
+			logger.info("DEST>>> "+file.getPath());
+			if(bundle.exists()) {
+				bundle.renameTo(new File(file.getPath()+File.separator+bundle.getName()));
+			}			
+		}
+		
+		
+		
+		HashMap<String, String> response = new HashMap<String, String>();
+		response.put("Response", "Ok");
+		return response;
 	}
 	
 	@RequestMapping(value = "/add-prereq", method = { RequestMethod.POST })

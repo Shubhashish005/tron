@@ -17,15 +17,17 @@ public class CobolRunner implements CommandLineRunner {
 	public void run(String... arg0) throws Exception {
 
 		logger.info("-------------------------------");
-		logger.info(">>> IM INSIDE COBOL RUNNER  >>>");
+		logger.info(">>>     SERVER STARTED      >>>");
 		logger.info("-------------------------------");
 		
+		/*
 		ProcessBuilder pb = new ProcessBuilder("c:\\Spring\\cmdtest.cmd");
 		pb.directory(new File("c:\\Spring\\"));
 		pb.redirectOutput(new File("c:\\Spring\\out.log"));
 		pb.start();
+		*/
 		
-		logger.info(pb.toString());
+		//logger.info(pb.toString());
 
 	}
 

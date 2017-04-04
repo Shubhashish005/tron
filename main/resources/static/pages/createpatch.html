@@ -66,10 +66,10 @@ a:hover {
 				      <!-- input type="text" ng-model="patch.env" class="form-control" id="env" placeholder="Environment"-->
 				    </div>
 				  </div>
-				  <div class="form-group">
+				  <div class="form-group" style="display:none;">
 				    <label class="control-label col-sm-4" for="dest">Destination:</label>
 				    <div class="col-sm-6"> 
-				      <input type="text" ng-model="patch.dest" class="form-control" id="dest" placeholder="Destination">
+				      <input type="text" ng-model="patch.dest" value="\SPL\CCB250" class="form-control" id="dest" placeholder="Destination">
 				    </div>
 				  </div>	
 				  <div class="form-group">
@@ -89,6 +89,27 @@ a:hover {
 				      <div class="checkbox">
 				        <label><input type="checkbox" ng-true-value="'Y'" ng-false-value="'N'" ng-model="patch.hasBundle">Has Bundle</label>
 				      </div>
+				 	 <div style="margin-top:10px;"  class="col-sm-12" ng-show="patch.hasBundle == 'Y'">
+				 	 	<div flow-init="{target: '/file-upload'}" flow-name="pre.flow"
+						     flow-files-submitted="$flow.upload()"
+						     flow-file-added="handleBundleAdd($file, $event, $flow)"
+						     flow-file-success="$file.msg = $message">
+						  
+						  <div class="alert alert-warning dropzone" flow-drop>
+							    Drag And Drop your Bundle here or click upload button <span class="btn btn-primary" flow-btn>Upload Bundle</span>
+						  </div>
+						  <table class="table table-striped">
+						    <tr ng-repeat="file in $flow.files">
+						        <td>{{$index+1}}</td>
+						        <td>{{file.name}}</td>
+						        <td>{{file.msg}}</td>
+						        <td><button class="btn btn-sm btn-primary" ng-click="deleteFromServer($flow.files, file)"><i class="fa fa-times"></i></button></td>
+						    </tr>
+						  </table>
+						</div>
+				 	 </div> 				      
+				      
+				      
 				    </div>
 				  </div>
 				  <div class="form-group"> 

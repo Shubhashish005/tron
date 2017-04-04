@@ -12,6 +12,9 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -100,9 +103,33 @@ class AdminService_Impl implements AdminService {
 	}
 
 	@Override
-	public Environment addEnvironment(Environment environment) {
-		return envrRepo.save(environment);
+	public Environment addEnvironment(Environment environment) throws Exception {
+		if(validateEnvironment(environment))
+			return envrRepo.save(environment);
+		else
+			throw new Exception("Unable to Connect to Database");		
 	}
+	private boolean validateEnvironment(Environment environment) throws Exception {
+		
+		try {
+			
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+			Connection con=DriverManager.getConnection(	"jdbc:oracle:thin:@"+environment.getDbHost()+":"+environment.getDbPort()+":"+environment.getDbSid(),environment.getDbUser(),environment.getDbPswd());  
+		} catch (ClassNotFoundException e) {
+			logger.error("CLASS NOT FOUND "+e.getMessage());
+			return false;
+		} catch (SQLException e) {
+			logger.error(e.getMessage());
+			return false;
+		}  
+		  
+		if(!new File(environment.getEnvPath()).exists())
+			throw new Exception("Invalid SPLEBASE");
+		
+		return true;
+		
+	}
+
 	@Override
 	public void deleteEnvironment(Integer envId) {
 		// TODO Auto-generated method stub
@@ -387,7 +414,7 @@ class AdminService_Impl implements AdminService {
 		
 		File scriptFile = new File(pathToCmPackaging+File.separator+scriptName);
 		PrintWriter scriptFileWriter = new PrintWriter(scriptFile);
-		scriptFileWriter.println("CALL "+environment.getEnvPath()+File.separator+"bin"+File.separator+"splenviron.cmd -e RMB2502");
+		scriptFileWriter.println("CALL "+environment.getEnvPath()+File.separator+"bin"+File.separator+"splenviron.cmd -e "+environment.getEnvName());
 		scriptFileWriter.println("cd "+pathToPackage.toString());
 		scriptFileWriter.println("CALL "+pathToCmPackaging.toString()+File.separator+"applyCM.cmd");
 		scriptFileWriter.close();

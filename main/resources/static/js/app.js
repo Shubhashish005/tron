@@ -5,6 +5,9 @@ tronApp.controller('DashboardController', function($scope, $rootScope, $http,
 		$location, $confirm) {
 
 
+	$http.get("/patches/unset").success(function(data, status){
+		
+	});
 	
 	$http.get("/patches").success(function(data, status) {
 		$scope.strarrays = data;
@@ -112,6 +115,8 @@ tronApp.controller('CreatePatchController', function($scope, $rootScope, $locati
 	$scope.prereqs = [];
 	$scope.prer = {};
 	
+	$scope.bundles = [];
+	
 	$http.get("/environments").success(function(data, status){
 		$scope.environments = data;
 	});
@@ -135,6 +140,15 @@ tronApp.controller('CreatePatchController', function($scope, $rootScope, $locati
 		  prereq.packageName = $file.file.name;
 		 $scope.prereqs.push(prereq);
 	};
+	
+	$scope.handleBundleAdd = function ($file, $event, $flow) {
+		  console.log("flow...");
+		  console.log($file.file.name);
+		  //console.log(flowFile.d.files[0].file.name);
+		  var bundle = {};
+		  bundle.fileName = $file.file.name;
+		 $scope.bundles.push(bundle);
+	};	
 
 	$scope.deleteFromServer = function($files, file) {
 		//console.log($files);
@@ -186,6 +200,12 @@ tronApp.controller('CreatePatchController', function($scope, $rootScope, $locati
 		}).success(function(data, status, header){
 			$scope.patch = data;
 			$rootScope.patch = data;
+			
+			$http.post('/patches/add-bundle',{
+				data: $scope.bundles
+			}).success(function(data, status, header){
+				
+			});
 			
 			$http.post('/patches/add-prereq', {
 				data: $scope.prereqs
@@ -498,8 +518,8 @@ tronApp.controller('AppPatchController', function($scope, $rootScope, $location,
 		}).success(function(data, status, header){
 			console.log("Records Inserted");
 		});
-		console.log("APP >>>"+$rootScope.patch.hasDbPatch);
-		if($rootScope.patch.hasDbPatch)
+		console.log($rootScope.patch);
+		if($rootScope.patch.isDbIncl)
 			$location.path('/dbpatch');
 		else
 			$location.path('/review');
@@ -602,7 +622,7 @@ tronApp.controller('EnvironementeController', function($scope, $rootScope,
 
 				}).error(function(data, status, headers) {
 			//alert('Configuration Error');
-					toastr.error('Error occured while saving the configuration!', 'Alert!');
+					toastr.error(data.message, 'Alert!');
 		});
 	}
 
@@ -678,6 +698,65 @@ tronApp.controller('ApplyPatchController', function($scope, $http, $interval, to
 		}).error(function(data){
 			toastr.error(data.message,"Error! ");
 		});
+	};
+	
+});
+
+tronApp.controller('CreateServicePackController', function($scope, $http, toastr){
+	
+	$scope.packages = [];
+	
+    $scope.addPackage = function(index){
+	    var pack = {};
+	    pack.packageName = "";
+	    $scope.packages.splice(index+1,0, prereq);
+    }; 
+    
+    $scope.removePackage = function(index){
+	    $scope.packages.splice(index, 1);
+	}; 
+
+	$scope.handleFileAdd = function ($file, $event, $flow) {
+		  var pack = {};
+		  pack.packageName = $file.file.name;
+		 $scope.packages.push(pack);
+	};
+	
+	$scope.createServicePack = function() {
+		
+		$http.post('/set-sp', {sp: $scope.spName}).success(function(){
+			$http.post('/create-sp', $scope.packages).success(function(data, status, headers){
+				toastr.success('Service Pack created successfully','Alert');
+			});
+		});
+
+	};
+	
+	$scope.deleteFromServer = function($files, file) {
+		//console.log($files);
+		console.log(file);
+		$http.post('/delete-prereq',{
+			fileName: file.name
+		}).success(function(data, status, header) {
+
+		var found = false;
+		for (i = 0; i < $scope.packages.length; i++) {
+			if ($scope.packages[i].packageName == file.name) {
+				found = true;
+				break;
+			}
+		}
+
+		if (found) {
+			$scope.packages.splice(i, 1);
+		}
+
+		index = $files.indexOf(file);
+		if (index > -1)
+			$files.splice(index, 1);
+			toastr.success('File Deleted from the Server!', 'Alert!');
+		});
+		
 	};
 	
 });
@@ -812,7 +891,10 @@ tronApp.config(function($routeProvider) {
 		templateUrl: './pages/createpatch.html',
 		controller: 'CreatePatchController'
 	})
-
+	.when('/createsp', {
+		templateUrl: './pages/createsp.html',
+		controller: 'CreateServicePackController'
+	})
 	.when('/dbpatch', {
 		templateUrl: './pages/dbpatch.html',
 		controller: 'DBPatchController'
