@@ -1,6 +1,40 @@
 --select * from DASHBOARD;
 
+INSERT INTO GENERAL_SETTINGS(id, name, property) (SELECT 1, 'File Monitoring Folder', ' ' FROM INFORMATION_SCHEMA.SYSTEM_USERS  WHERE NOT EXISTS (select 'X' from GENERAL_SETTINGS WHERE name = 'File Monitoring Folder'));
 
+delete from ROLES_PRIVILEGES;
+delete from USER_ROLES;
+delete from ROLES;
+delete from USER;
+
+INSERT INTO USER(id, given_name, guid) values (1, 'Ujesh Lal', 'ut001');
+
+
+INSERT INTO ROLES(id, name) VALUES ('1', 'ADMIN');
+
+delete from PERMISSIONS;
+insert into permissions(id, name) values (1, 'MANAGE_ENV');
+insert into permissions(id, name) values (2, 'MANAGE_USER');
+insert into permissions(id, name) values (3, 'MANAGE_ROLE');
+insert into permissions(id, name) values (4, 'CREATE_PACKAGE');
+insert into permissions(id, name) values (5, 'APPLY_PACKAGE');
+insert into permissions(id, name) values (6, 'CREATE_SERVICE_PACK');
+insert into permissions(id, name) values (7, 'APPLY_SERVICE_PACK');
+insert into permissions(id, name) values (8, 'MANAGE_SCHEDULER');
+insert into permissions(id, name) values (9, 'VIEW_PACKAGES');
+insert into permissions(id, name) values (10, 'COMPARE_ENV');
+
+
+
+insert into USER_ROLES (ROLE_ID, USER_ID) values (1,1);
+
+insert into ROLES_PRIVILEGES(ROLE_ID, PERMISSION_ID) values (1,1);
+insert into ROLES_PRIVILEGES(ROLE_ID, PERMISSION_ID) values (1,2);
+
+
+
+ --MERGE INTO GENERAL_SETTINGS T USING (SELECT 1, 'File Monitoring Folder', ' ' FROM INFORMATION_SCHEMA.SYSTEM_USERS  WHERE NOT EXISTS (select 'X' from GENERAL_SETTINGS WHERE name = 'File Monitoring Folder') AS vals(x,y,Z) ON t.id = vals.x
+ --  WHEN NOT MATCHED THEN INSERT VALUES vals.x, vals.y, vals.z;
 
 
 --DELETE FROM ENVIRONMENT;

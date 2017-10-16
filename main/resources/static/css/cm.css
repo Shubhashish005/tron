@@ -134,7 +134,7 @@ body {
 
 .navbar-default {
 	/*background-color: #da022a;*/
-	background: linear-gradient(to bottom,#c10000 0,#f00 100%);
+	/*background: linear-gradient(to bottom,#c10000 0,#f00 100%);*/
 	
 }
 .btn-primary {
@@ -149,3 +149,15 @@ td {
 	color: #E2E2E2;
 	pointer-events: none;
 }
+.card {
+	min-height:400px;
+	text-align:center;
+}
+.push-to-bottom {
+    position: absolute;
+    text-align:left;
+    left: 30%;
+    bottom: 50px;
+}
+
+

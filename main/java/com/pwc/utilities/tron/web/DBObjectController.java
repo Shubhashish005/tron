@@ -138,7 +138,7 @@ public class DBObjectController {
 			scriptFileWriter.println("set SID="+environment.getDbSid());
 			scriptFileWriter.println("set CISADM_USER="+environment.getDbUser());
 			scriptFileWriter.println("set CISADM_PSWD="+environment.getDbPswd());
-			scriptFileWriter.println("set NLS_LANG=AL32UTF8");
+			scriptFileWriter.println("set NLS_LANG=WE8MSWIN1252");
 			scriptFileWriter.println("set CM_OWNER=CM");
 			scriptFileWriter.println("OraSDBp.exe -d %CISADM_USER%,%CISADM_PSWD%,%SID% -i %1 -o %2 -c %NLS_LANG%");
 			scriptFileWriter.close();

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:sec="http://www.springframework.org/security/tags">
 <head>
 <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -12,11 +12,13 @@
 <link href="./css/font-awesome.min.css" rel="stylesheet" />
 <link href="./jstree/css/style.css" rel="stylesheet" />
 <link href="./bower_components/angular-toastr/dist/angular-toastr.min.css" rel="stylesheet"/>
+<link rel="stylesheet" href="./bower_components/angular-bootstrap-datetimepicker/src/css/datetimepicker.css"/>
 
 <!-- Custom Style -->
 <link href="./css/cm.css" rel="stylesheet" />
 
 <script src="./js/jquery.js"></script>
+<script type="text/javascript" src="./bower_components/moment/moment.js"></script>
 <script src="./js/angular.min.js"></script>
 <script src="./js/angular-route.min.js"></script>
 <script src="./js/checklist-model.js"></script>
@@ -31,6 +33,15 @@
 <script src="./js/bootstrap.min.js"></script>	
 <script src="./bower_components/ng-flow/dist/ng-flow-standalone.min.js"></script>
 <script src="./bower_components/angular-toastr/dist/angular-toastr.tpls.min.js"></script>
+<script type="text/javascript" src="./bower_components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js"></script>
+<script type="text/javascript" src="./bower_components/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js"></script>
+<!-- personal preference: github theme -->
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/styles/googlecode.min.css"/>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.10.0/highlight.min.js"></script>
+<script src="./bower_components/angular-drag-and-drop-lists/angular-drag-and-drop-lists.min.js"></script>
+
+
+<script src="./bower_components/angular-highlightjs/build/angular-highlightjs.min.js"></script>
 <script src="./js/app.js"></script>
 
 <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -65,7 +76,7 @@
 		<!-- /.modal-dialog -->
 	</div>
 
-	<div class="navbar navbar-default navbar-fixed-top">
+	<div class="navbar navbar-inverse navbar-fixed-top">
 		<div class="container">
 			<div class="navbar-header">
 				<a href="../#/" class="navbar-brand"><i
@@ -79,22 +90,38 @@
 			<div class="navbar-collapse collapse" id="navbar-main">
 				<ul class="nav navbar-nav">
 					<li class="dropdown">
-						<a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Menu <span class="caret"></span></a>
+						<a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Release <span class="caret"></span></a>
 				          <ul class="dropdown-menu">
 				            <li><a href="#/createpatch">Create Release Module</a></li>
 				            <li><a class="disabled" disabled="true" href="#/createpatch">Create Patch</a></li>
 				            <li><a href="#/createsp">Create Service Pack</a></li>
-				            <li><a href="#/manage-env">Manage Environments</a></li>
 				            <li role="separator" class="divider"></li>
 				            <li><a href="#/applypatch">Apply Release Module</a></li>
 				            <li><a class="disabled" disabled="true" href="#">Apply Patch</a></li>
 				            <li><a href="#/applysp">Apply Service Pack</a></li>
 				          </ul>
 					</li>
+					<li class="dropdown">
+						<a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Environment <span class="caret"></span></a>
+				          <ul class="dropdown-menu">
+				            <li sec:authorize="hasAuthority('MANAGE_ENV')"><a href="#/manage-env">Manage Environments</a></li>
+				            <li><a href="#/applied-packages">Applied Packages</a></li>
+				            <li><a href="#/compare-environ">Compare Environments</a></li>
+				            <li><a href="#/scheduler">Scheduler</a></li>
+				          </ul>
+					</li>	
+					<li class="dropdown">
+						<a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin <span class="caret"></span></a>
+				          <ul class="dropdown-menu">
+				            <li sec:authorize="hasAuthority('MANAGE_ENV')"><a href="#/manage-role">Manage Roles</a></li>
+							<li><a href="#/manage-users">Manage Users</a></li>
+				          </ul>
+					</li>					
+					<!-- li><a href="#/general-settings">General Settings</a></li-->				
 				</ul>
 
 				<ul class="nav navbar-nav navbar-right">
-					<li><a href="help" target="_blank">Help</a></li>
+					<li th:inline="text"><a href="help" target="_blank">Welcome [[${#httpServletRequest.remoteUser}]]!</a></li>
 				</ul>
 
 			</div>

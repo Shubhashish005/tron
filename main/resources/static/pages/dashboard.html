@@ -1,7 +1,7 @@
 
 <div class="row">
 	<div class="container">
-		<h2 style="color: #bf3e11">Dashboard</h2>
+		<h2>Dashboard</h2>
 		<hr />
 		<div class="row shrt-cuts">
 			<!-- >div class="col-lg-12">
@@ -10,8 +10,60 @@
 			</div-->
 		</div>
 		
-		<div class="panel panel-default">
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="col-lg-4">
+					<div class="panel panel-default card">
+						<div class="panel-body">
+							<div>Environments</div>
+								<ul class="list-group" style="margin-top:25px;text-align:left;">
+								  <li ng-click="updateDetails(item)" class="list-group-item" ng-repeat="item in items">{{item.envName}}<span style="font-size:12px;" class="label pull-right" ng-class="{ 'label-success':item.status, 'label-danger': !item.status}">{{item.status ? 'Running' : 'Down'}}</span></li>
+								</ul>
+						</div>
+						<a class="btn btn-info push-to-bottom" href="#/manage-env">Manage Environment</a>
+					</div>
+				</div>
+				<div class="col-lg-4">
+					<div class="panel panel-default card">
+						<div class="panel-body">
+							<div>Details</div>
+							<div class="details" style="margin-top:25px;">
+								<table class="table table-striped">
+									<tr><th>Environment</th><th>{{env.envName}}</th></tr>
+									<tr><td>Framework Version</td><td>{{env.fwVersion}}</td></tr>
+									<tr><td>CCB Version</td><td>{{env.envVersion}}</td></tr>
+								</table>
+							</div>
+							
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-4">
+					<div class="panel panel-default card">
+						<div class="panel-body">
+							<div>Deployment Details</div>
+							<div class="details" style="margin-top:25px;">
+							    <div class="text-info" style="font-size:60px;">{{env.totalNumOfPackages}}</div>
+							    <div class="text-info">Packages currently installed</div>
+								<table class="table">
+									<tr><td colspan="2">{{env.continuesDeploy ? 'Environment is set in Continuous Deployment mode':'Environment is not set in Continuous Deployment mode'}}</td></tr>
+									<tr><td>Next Schedule</td><td class="text-warning">{{env.nextDeployment | date:'medium'}}</td></tr>
+								</table>
+							</div>
+							<a class="btn btn-primary push-to-bottom" href="#/applied-packages">Applied Packages</a>
+						</div>
+					</div>
+				</div>
+				
+			</div>
+		</div>		
+		
+		<div style="display:none;" class="panel panel-default">
 			<div class="panel-body">
+
+
+
+
 
 				<table class="table table-striped">
 					<tr>

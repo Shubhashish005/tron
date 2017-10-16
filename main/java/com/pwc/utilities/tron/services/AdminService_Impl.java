@@ -6,9 +6,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -24,7 +24,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,23 +32,31 @@ import com.google.common.io.Files;
 import com.pwc.utilities.tron.model.entity.Dashboard;
 import com.pwc.utilities.tron.model.entity.DbObj;
 import com.pwc.utilities.tron.model.entity.Environment;
+import com.pwc.utilities.tron.model.entity.GeneralSetting;
 import com.pwc.utilities.tron.model.entity.InstallRecord;
+import com.pwc.utilities.tron.model.entity.LocalUser;
 import com.pwc.utilities.tron.model.entity.Notification;
 import com.pwc.utilities.tron.model.entity.Patch;
 import com.pwc.utilities.tron.model.entity.PatchApp;
 import com.pwc.utilities.tron.model.entity.PatchDb;
+import com.pwc.utilities.tron.model.entity.Permission;
 import com.pwc.utilities.tron.model.entity.Prerequisite;
+import com.pwc.utilities.tron.model.entity.Role;
 import com.pwc.utilities.tron.model.entity.ServicePack;
 import com.pwc.utilities.tron.model.repository.DBConfigurationRepository;
 import com.pwc.utilities.tron.model.repository.DashboardRepository;
 import com.pwc.utilities.tron.model.repository.DbObjRepository;
 import com.pwc.utilities.tron.model.repository.EnvironmentRepository;
+import com.pwc.utilities.tron.model.repository.GeneralSettingRepository;
 import com.pwc.utilities.tron.model.repository.InstallRecordRepository;
+import com.pwc.utilities.tron.model.repository.LocalUserRepository;
 import com.pwc.utilities.tron.model.repository.NotificationRepository;
 import com.pwc.utilities.tron.model.repository.PatchAppRepository;
 import com.pwc.utilities.tron.model.repository.PatchDbRepository;
 import com.pwc.utilities.tron.model.repository.PatchRepository;
+import com.pwc.utilities.tron.model.repository.PremissionRepository;
 import com.pwc.utilities.tron.model.repository.PrerequisiteRepository;
+import com.pwc.utilities.tron.model.repository.RoleRepository;
 import com.pwc.utilities.tron.model.repository.ServicePackRepository;
 
 @Service
@@ -89,16 +96,26 @@ class AdminService_Impl implements AdminService {
 
 	@Autowired
 	private NotificationRepository notificationRepo;
+	
+	@Autowired
+	private GeneralSettingRepository generalSettingRepo;
+	
+	@Autowired
+	private LocalUserRepository localUserRepo;
+	
+	@Autowired
+	private RoleRepository roleRepo;
+	
+	@Autowired
+	private PremissionRepository permissionRepo;
 
 	@Override
 	public Iterable<Environment> getAllEnvironemnts() {
-		// TODO Auto-generated method stub
 		return envrRepo.findAll();
 	}
 	
 	@Override
 	public Environment getEnvironment(Integer envID) {
-		// TODO Auto-generated method stub
 		return envrRepo.findOne(envID);
 	}
 
@@ -379,6 +396,8 @@ class AdminService_Impl implements AdminService {
 			applyBlueprint(packageName, environment);
 
 			applyPackage(packageName, environment);
+			
+			applyBundle(packageName, environment);
 
 		}
 			
@@ -406,8 +425,11 @@ class AdminService_Impl implements AdminService {
 		
 			
 		Path pathToCmPackaging = Paths.get("tools/CM_packaging").toAbsolutePath();			
-		Path pathToPackage = Paths.get("storage/tmp/"+packageName+"/Code").toAbsolutePath();		
+		Path pathToPackage = Paths.get("storage/tmp/"+packageName+"/code").toAbsolutePath();		
 
+		if(!pathToPackage.toFile().exists())
+			return;
+		
 		//Create a Temp Script in the ApplyCm Folder, this script will be delete at the end
 		long timestamp = new Date().getTime();
 		String scriptName = "runApplyCm"+timestamp+".cmd";
@@ -432,7 +454,7 @@ class AdminService_Impl implements AdminService {
 		if(scriptFile.exists())
 			scriptFile.delete();	
 		} catch(Exception e){
-			
+			logger.error("Error "+e.getMessage());
 		}	
 		
 		// Move Applied Package to Package Repository
@@ -441,6 +463,7 @@ class AdminService_Impl implements AdminService {
 			targetFolder.getParentFile().mkdirs();
 
 		Files.copy(Paths.get("storage/tmp/" + packageName + ".zip").toFile(), targetFolder.getAbsoluteFile());
+		
 		packageName = packageName+"\n";
 		//Update Patch Details in etc
 		if(Paths.get(environment.getEnvPath()+File.separator+"etc"+File.separator+"installed_packages.txt").toFile().exists())
@@ -716,16 +739,229 @@ class AdminService_Impl implements AdminService {
 					applyPrereq(packageName, environment);				
 					applyBlueprint(packageName, environment);				
 					applyPackage(packageName, environment);
+					applyBundle(packageName, environment);
 				} else {
 					createNotification("Package "+packageName+" Already applyed", "Skipped");
 				}
 				
 	        }
 			
+		}
+
+		@Override
+		public List<Map<String, String>> getAppliedPackageList(Environment environment, String path) {
+			
+			File file = null;
+			
+
+			
+			if(!path.equalsIgnoreCase("root"))
+				file = new File(path);
+			else
+				file = new File(environment.getPathToPackages()+File.separator);
+			
+			logger.info(file.getAbsoluteFile());
+			List<Map<String, String>> response = new ArrayList<Map<String,String>>();
+			if(file.isDirectory())
+			{
+				File folderListing[] = file.listFiles();
+				for(File eachFile : folderListing) {
+					if(eachFile.isFile() && eachFile.getName().contains(".zip"))
+						continue;
+					Map<String, String> fileEntry = new HashMap<String, String>();
+					fileEntry.put("id", eachFile.getAbsolutePath());
+					fileEntry.put("parent", path);
+					fileEntry.put("text", eachFile.getName());
+					if(eachFile.isFile()) {
+						fileEntry.put("icon", "jstree-icon jstree-file");
+					}
+					response.add(fileEntry);
+				}
+			}
+			return response;
+		}
+
+		@Override
+		public Map<String, String> readFile(String path) throws IOException {
+		
+			byte[] buf = java.nio.file.Files.readAllBytes(Paths.get(path));
+			String str = new String(buf,"UTF-8");
+			Map<String, String> returnObj = new HashMap<String, String>();
+			returnObj.put("code", str);
+			String extension = "";
+
+			int i = path.lastIndexOf('.');
+			if (i > 0) {
+			    extension = path.substring(i+1);
+			}
+			returnObj.put("lang", extension);
+			
+			return returnObj;
+		}
+
+		@Override
+		public List<Map<String, String>> compareEnvs(Environment source, Environment target) {
+			
+			File sourceFileFolder = new File(source.getPathToPackages());
+			File targetFileFolder = new File(target.getPathToPackages());
+			
+			ArrayList<Map<String, String>> additionList = new ArrayList<Map<String,String>>();
+			ArrayList<Map<String, String>> deletionList = new ArrayList<Map<String,String>>();
+			ArrayList<Map<String, String>> commonList = new ArrayList<Map<String,String>>();
+			ArrayList<Map<String, String>> returnList = new ArrayList<Map<String,String>>();
+			
+			File [] sourcePackageList = sourceFileFolder.listFiles(new FilenameFilter() {				
+				@Override
+				public boolean accept(File dir, String name) {
+					return new File(dir, name).isDirectory();
+				}
+			});
+			
+			File [] targetPackageList = targetFileFolder.listFiles(new FilenameFilter() {				
+				@Override
+				public boolean accept(File dir, String name) {
+					return new File(dir, name).isDirectory();
+				}
+			});			
+			
+			for(File s : sourcePackageList) {
+				boolean found = false;
+				HashMap<String, String> element = new HashMap<String, String>();
+				for(File t: targetPackageList) {
+					if(s.getName().equalsIgnoreCase(t.getName())) {
+						found = true;
+						break;
+					}						
+				}
+				if(found) {					
+					element.put("item", s.getName());
+					element.put("status", "=");
+					commonList.add(element);
+				} else {
+			
+					element.put("item", s.getName());
+					element.put("status", "+");		
+					additionList.add(element);
+				}
+			}
+			
+			for(File t : targetPackageList) {
+				boolean found = false;
+				
+				for(File s: sourcePackageList) {
+					if(t.getName().equalsIgnoreCase(s.getName())) {
+						found = true;
+						break;
+					}				
+				}
+				if(!found) {
+					HashMap<String, String> element = new HashMap<String, String>();
+					element.put("item", t.getName());
+					element.put("status", "-");
+					deletionList.add(element);
+				} 
+			}			
+			
+			returnList.addAll(additionList);
+			returnList.addAll(deletionList);
+			returnList.addAll(commonList);
+			
+			return returnList;
+		}
+
+		@Override
+		public void applyBundle(String packageName, Environment environment) throws IOException, InterruptedException {
+
+			Notification applyPackageNotification = createNotification("Applying Bundle " + packageName, "In Progress");
+			
+			Path pathToPackage = Paths.get("storage/tmp/"+packageName+"/bundle").toAbsolutePath();
+			long timestamp = new Date().getTime();
+			String scriptName = "applyBundle"+timestamp+".cmd";
+			
+			File directoryLising[] = pathToPackage.toFile().listFiles(new FilenameFilter() {				
+				@Override
+				public boolean accept(File dir, String name) {
+					if(name.endsWith(".xml"))
+						return true;
+					else
+						return false;
+				}
+			});
+			
+			if(directoryLising!=null)
+			for (File file : directoryLising) {
+				
+				File scriptFile = new File(pathToPackage+File.separator+scriptName);
+				PrintWriter scriptFileWriter = new PrintWriter(scriptFile);
+				scriptFileWriter.println("CALL "+environment.getEnvPath()+File.separator+"bin"+File.separator+"splenviron.cmd -e "+environment.getEnvName());
+				scriptFileWriter.println("cd "+environment.getEnvPath()+File.separator+"bin");
+				scriptFileWriter.println("CALL submitjob.cmd -e THIN -l2 READ_WRITE -b CM-BUNDL -l ENG -u SYSUSER -x XML_FILE_PATH="+pathToPackage.toString()+File.separator+",XML_FILE="+file.getName()+",APPLY_SW=Y");
+				scriptFileWriter.close();			
+
+				ProcessBuilder pb = new ProcessBuilder(pathToPackage+File.separator+scriptName);
+				pb.directory(pathToPackage.toFile());
+				pb.redirectOutput(new File(pathToPackage+File.separator+"out_apply.log"));
+				pb.redirectError(new File(pathToPackage+File.separator+"error_apply.log"));
+				Process process = pb.start();
+				process.waitFor();
+				
+				if(scriptFile.exists())
+					scriptFile.delete();				
+				
+			}
+			
+
+
+			applyPackageNotification.setStatus("Completed");
+			updateNotification(applyPackageNotification);
+			
+		}
+
+		@Override
+		public Iterable<GeneralSetting> getSettings() {			
+			return generalSettingRepo.findAll();
+		}
+
+		@Override
+		public GeneralSetting updateSetting(GeneralSetting gs) {
+			return generalSettingRepo.save(gs);
+		}
+
+		@Override
+		public LocalUser addLocalUser(LocalUser user) {
+			return localUserRepo.save(user);
+		}
+
+		@Override
+		public LocalUser getLocalUser(Integer id) {
+			return localUserRepo.findOne(id);
+		}
+
+		@Override
+		public LocalUser getLocalUserByGuid(String guid) {
+			return localUserRepo.getLocaluserFromGuid(guid);
+		}
+
+		@Override
+		public Iterable<LocalUser> getAllLocalUser() {
+			return localUserRepo.findAll();
+		}
+
+		@Override
+		public Iterable<Role> getRoles() {
+			return roleRepo.findAll();
+		}
+
+		@Override
+		public Role createRole(Role role) {
+			return roleRepo.save(role);
+		}
+
+		@Override
+		public Iterable<Permission> getPermissions() {
+			return permissionRepo.findAll();
 		}	
-	
-	
-		  
-	
+		
+		
 
 }

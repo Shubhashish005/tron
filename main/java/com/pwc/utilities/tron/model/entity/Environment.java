@@ -2,6 +2,7 @@ package com.pwc.utilities.tron.model.entity;
 
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -44,6 +45,15 @@ public class Environment extends BaseEntity {
 
 	@Column(name = "path_to_packages")
 	private String pathToPackages;
+	
+	@Column(name = "path_to_watch")
+	private String watchFolder;
+	
+	@Column(name = "next_run_dttm")
+	private Date nextRun;
+	
+	@Column(name = "continues_sw")
+	private boolean isContinuesDeploy = false;
 	
 	public String getProject() {
 		return project;
@@ -131,6 +141,30 @@ public class Environment extends BaseEntity {
 
 	public void setProduct(String product) {
 		this.product = product;
+	}
+
+	public String getWatchFolder() {
+		return watchFolder;
+	}
+
+	public void setWatchFolder(String watchFolder) {
+		this.watchFolder = watchFolder;
+	}
+
+	public Date getNextRun() {
+		return nextRun;
+	}
+
+	public void setNextRun(Date nextRun) {
+		this.nextRun = nextRun;
+	}
+
+	public boolean isContinuesDeploy() {
+		return isContinuesDeploy;
+	}
+
+	public void setContinuesDeploy(boolean isContinuesDeploy) {
+		this.isContinuesDeploy = isContinuesDeploy;
 	}
 	
 	

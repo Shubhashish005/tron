@@ -1,6 +1,7 @@
 package com.pwc.utilities.tron.services;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -11,12 +12,16 @@ import javax.servlet.http.HttpServletRequest;
 import com.pwc.utilities.tron.model.entity.Dashboard;
 import com.pwc.utilities.tron.model.entity.DbObj;
 import com.pwc.utilities.tron.model.entity.Environment;
+import com.pwc.utilities.tron.model.entity.GeneralSetting;
 import com.pwc.utilities.tron.model.entity.InstallRecord;
+import com.pwc.utilities.tron.model.entity.LocalUser;
 import com.pwc.utilities.tron.model.entity.Notification;
 import com.pwc.utilities.tron.model.entity.Patch;
 import com.pwc.utilities.tron.model.entity.PatchApp;
 import com.pwc.utilities.tron.model.entity.PatchDb;
+import com.pwc.utilities.tron.model.entity.Permission;
 import com.pwc.utilities.tron.model.entity.Prerequisite;
+import com.pwc.utilities.tron.model.entity.Role;
 import com.pwc.utilities.tron.model.entity.ServicePack;
 
 
@@ -27,7 +32,11 @@ public interface AdminService {
 	Environment addEnvironment(Environment environment) throws Exception;
 	void deleteEnvironment(Environment environment);
 	void deleteEnvironment(Integer envId);
+	List<Map<String, String>> getAppliedPackageList(Environment environment, String path);
+	Map<String,String> readFile(String path) throws IOException;
+	List<Map<String, String>> compareEnvs(Environment source, Environment target);
 	
+		
 	Iterable<Patch> getPatches();
 	Patch getPatch(Integer patchId);
 	Patch addPatch(Patch patch);
@@ -77,6 +86,7 @@ public interface AdminService {
 	void applyPrereq(String packageName, Environment environment) throws IOException, InterruptedException;
 	void applyPackage(String packageName, Environment environment) throws IOException;
 	void applyBlueprint(String packageName, Environment environment) throws IOException, InterruptedException;
+	void applyBundle(String packageName, Environment environment) throws  IOException, InterruptedException;
 	void unzip(String packageName);
 	
 	Iterable<Notification> getAllNotifications();
@@ -89,4 +99,24 @@ public interface AdminService {
 	
 	void zipFolder(String srcFolder, String destZipFile) throws Exception;
 	void applySP(String spName, Environment environment) throws IOException, InterruptedException;
+	
+	Iterable<GeneralSetting> getSettings();
+	GeneralSetting updateSetting(GeneralSetting gs); 
+	
+	
+	// LocalUser
+	LocalUser addLocalUser(LocalUser user);
+	LocalUser getLocalUser(Integer id);
+	LocalUser getLocalUserByGuid(String guid);
+	Iterable<LocalUser> getAllLocalUser();
+	
+	// Roles
+	Iterable<Role> getRoles();
+	Role createRole(Role role);
+	
+	// Permission
+	Iterable<Permission> getPermissions();
+
+	
+
 }
