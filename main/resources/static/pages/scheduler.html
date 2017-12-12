@@ -1,0 +1,78 @@
+<style>
+a:hover {
+	cursor:pointer;
+}
+.dropzone {
+	border: 2px dashed;
+}
+.hcolmn {
+	background-color: #eee;
+	width:200px;
+}
+	
+.last {
+	color: #c0c0c0;
+}
+
+
+</style>
+<div class="row">
+	<div class="container">
+		<h4 style="color:rgb(52, 85, 120);">Scheduler Settings</h4>
+		<hr />
+
+		<div class="panel panel-default">
+			<div class="panel-body" ng-init="tab = 1">
+				<form class="form-horizontal" role="form">
+					<div class="col-md-6">
+
+						<div class="form-group">
+							<label class="control-label col-sm-4" for="env">Environment:</label>
+							<div class="col-sm-6">
+								<select ng-model="env" class="form-control" name="env"
+									ng-change="setEnv(x)"
+									ng-options="x.envName for x in environments"></select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-sm-4">Monitoring Folder:</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" ng-model="environment.watchFolder">
+							</div>
+						</div>						
+						<div class="form-group">
+							<label class="control-label col-sm-4">Next Deployment:</label>
+							<div class="col-sm-6">							
+								<div class="dropdown" id="cal">
+								      <div class="input-group">
+								        <input type="text" id="date" name="date" class="form-control" data-ng-model="environment.nextRun|date:'medium'">
+								        <span class="input-group-addon"><i  data-toggle="dropdown" data-target="#cal" role="button" class="fa fa-calendar dropdown-toggle"></i></span>
+								      </div>
+
+								    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+								      <datetimepicker   data-ng-model="environment.nextRun" data-datetimepicker-config="{ dropdownSelector: '#dropdown' }"></datetimepicker>
+								    </ul>
+								  </div>
+								  
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-sm-4">Continues Monitoring</label>
+							<div class="col-sm-6">
+								<input type="checkbox" ng-model="environment.continuesDeploy">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-sm-4"></label>
+							<div class="col-sm-6">
+								<input type="button" class="btn btn-primary" ng-click="saveChanges();" value="Save Changes">
+							</div>
+						</div>
+
+
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

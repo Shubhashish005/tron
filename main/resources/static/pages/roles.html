@@ -1,0 +1,138 @@
+<style>
+ ul[dnd-list] {
+    min-height: 42px;
+    padding-left: 0px;
+}
+
+/**
+ * The dndDraggingSource class will be applied to
+ * the source element of a drag operation. It makes
+ * sense to hide it to give the user the feeling
+ * that he's actually moving it.
+ */
+ ul[dnd-list] .dndDraggingSource {
+    display: none;
+}
+
+
+</style>
+
+<div class="row">
+	<div class="container">
+		<h2 style="color: #bf3e11">Roles</h2>
+		<hr />
+
+		<div class="panel panel-default">
+
+			<div class="panel-body">
+				<input type="button" class="btn btn-primary pull-right"
+					ng-click="addRole()" value="Add Role"
+					style="margin-bottom: 20px;">
+
+				<table class="table table-striped" style="table-layout:fixed; width:100%;">
+					<tr>
+						<th width="200px">Role Name</th>
+						<th width="640px">Authorities</th>
+						<th class="text-right">Action</th>
+					</tr>
+					</tr>
+					<tr ng-repeat="role in roles">
+						<td>{{role.name}}</td>
+						<td><div style="word-break:break-all;"><span style="margin-right: 2px; white-space:normal"
+							class="label label-success"
+							ng-repeat="premission in role.permissions">{{premission.name}}</span></div>
+						</td>
+						<td>
+						
+							<div class="btn-group pull-right" role="group" aria-label="...">
+								<button type="button" class="btn btn-default btn-sm"
+									ng-click="deleteRole(role)">
+									<i class="fa fa-trash"></i>
+								</button>
+								<button type="button" class="btn btn-default btn-sm"
+									ng-click="updateRole(role)">
+									<i class="fa fa-list-alt"></i>
+								</button>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<div class="modal fade" id="myModal" role="dialog">
+			<div class="modal-dialog modal-md">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class="modal-title">Configure Role</h4>
+					</div>
+					<div class="modal-body">
+						<form class="form-horizontal" role="form">
+
+							<div class="form-group">
+								<label class="control-label col-sm-4" for="email">Role
+									Name</label>
+								<div class="col-sm-8">
+									<input type="text" class="form-control" name="a" id="a"
+										ng-model="role.name" placeholder="Role Name">
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-lg-12">
+									<div class="col-lg-6">
+										<div class="panel panel-default">
+											<!-- Default panel contents -->
+											<div class="panel-heading">Available Authority</div>
+												<ul dnd-list="permissions" class="list-group" dnd-disable-if="true">
+													<!-- The dnd-draggable directive makes an element draggable and will
+									         transfer the object that was assigned to it. If an element was
+									         dragged away, you have to remove it from the original list
+									         yourself using the dnd-moved attribute -->
+													<li class="list-group-item"
+														ng-repeat="item in permissions | filter:availablePermissions"
+														dnd-draggable="item"
+														dnd-moved="permissions.splice($index, 1)"
+														dnd-effect-allowed="move"
+														dnd-selected="models.selected = item"
+														ng-class="{'selected': models.selected === item}">
+														{{item.name}}</li>
+												</ul>
+											</div>
+									</div>
+									<div class="col-lg-6">
+										<div class="panel panel-default">
+											<!-- Default panel contents -->
+											<div class="panel-heading">Panel heading</div>
+												<ul dnd-list="role.permissions" class="list-group">
+													<!-- The dnd-draggable directive makes an element draggable and will
+									         transfer the object that was assigned to it. If an element was
+									         dragged away, you have to remove it from the original list
+									         yourself using the dnd-moved attribute -->
+													<li class="list-group-item"
+														ng-repeat="item in role.permissions" dnd-draggable="item" dnd-disable-if="true"
+														dnd-moved="role.permissions.splice($index, 1)"
+														dnd-effect-allowed="move"
+														dnd-selected="models.selected = item"
+														ng-class="{'selected': models.selected === item}">
+														{{item.name}} <span ng-click="role.permissions.splice($index, 1)"><i style="font-size: 16px;" class="fa fa-times text-danger"></i></span>
+													</li>
+													<li class="list-group-item list-group-item-info dndPlaceholder"> Drop a <strong>Authority</strong> here </li>
+												</ul>
+											</div>
+									</div>
+
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-info" ng-click="saveRole()">Save</button>
+							</div>
+
+						</form>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

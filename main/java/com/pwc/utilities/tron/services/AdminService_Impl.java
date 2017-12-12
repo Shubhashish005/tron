@@ -946,6 +946,11 @@ class AdminService_Impl implements AdminService {
 		public Iterable<LocalUser> getAllLocalUser() {
 			return localUserRepo.findAll();
 		}
+		
+		@Override
+		public void deleteLocalUser(LocalUser user) {
+			localUserRepo.delete(user);
+		};
 
 		@Override
 		public Iterable<Role> getRoles() {

@@ -109,6 +109,7 @@ public interface AdminService {
 	LocalUser getLocalUser(Integer id);
 	LocalUser getLocalUserByGuid(String guid);
 	Iterable<LocalUser> getAllLocalUser();
+	void deleteLocalUser(LocalUser user);
 	
 	// Roles
 	Iterable<Role> getRoles();

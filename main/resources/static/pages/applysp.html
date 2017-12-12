@@ -1,0 +1,94 @@
+<style>
+a:hover {
+	cursor:pointer;
+}
+.dropzone {
+	border: 2px dashed;
+}
+.hcolmn {
+	background-color: #eee;
+	width:200px;
+}
+	
+.last {
+	color: #c0c0c0;
+}
+
+
+</style>
+
+<div class="row">
+	<div class="container">
+		<h4 style="color: #bf3e11">Apply Service Pack</h4>
+		<hr />
+
+		<div class="panel panel-default">
+			<div class="panel-body" ng-init="tab = 1">
+				<form class="form-horizontal" role="form">
+					<div class="col-md-6">
+
+						<div class="form-group">
+							<label class="control-label col-sm-4" for="env">Environment:</label>
+							<div class="col-sm-6">
+								<select ng-model="env" class="form-control" name="env"
+									ng-change="setEnv(x)"
+									ng-options="x.envName for x in environments"></select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-sm-4">SPLEBASE</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" readonly="true"
+									ng-model="environment.envPath">
+							</div>
+						</div>						
+						<div class="form-group">
+							<label class="control-label col-sm-4">Install Location</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" readonly="true"
+									ng-model="environment.pathToPackages">
+							</div>
+						</div>
+						
+
+							<p>&nbsp;</p>
+							<h4>Upload Service Package</h4>
+							<div flow-init="{target: '/upload-package'}"
+							     flow-files-submitted="$flow.upload()"
+							     flow-file-added="handleFileAdd($file, $event, $flow)"
+							     flow-file-success="$file.msg = $message">
+							  
+							  <div class="alert alert-warning dropzone" flow-drop>
+								    Drag And Drop your file here or click upload button <span class="btn btn-primary" flow-btn>Upload File</span>
+							  </div>
+							  <table class="table table-striped">
+							    <tr ng-repeat="file in $flow.files">
+							        <td>{{$index+1}}</td>
+							        <td>{{file.name}}</td>
+							        <td>{{file.msg}}</td>
+							    </tr>
+							  </table>
+							</div>
+							
+						<div class="col-sm-12 alert alert-danger" ng-show="isPackageExist">
+							<strong>Warning!</strong> Package already present in Applied directory, Applying this package will override the existing one.
+						</div>
+						<p></p>
+						<div class="form-group">
+							<label class="control-label col-sm-0"></label>
+							<div class="col-sm-6">
+								<button class="btn btn-primary" ng-click="applySP()" ng-disabled="applying">
+									<span>Apply Service Pack </span>
+									<i class="fa fa-spinner fa-spin" ng-show="applying"></i>
+								</button>
+							</div>
+						</div>
+					 	<table id="notify" class="table table-condensed">
+					 		<tr ng-repeat="notification in notifications"><td ng-class="{'last' : notification.status == 'In Progress'}">{{notification.message}} [{{notification.status}}]</td></tr>
+					 	</table>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

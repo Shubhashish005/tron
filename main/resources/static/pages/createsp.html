@@ -1,0 +1,78 @@
+<div class="row">
+	<div class="container">
+		<h2 style="color: #bf3e11">Create SP</h2>
+		<hr />
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<form class="form-horizontal" role="form">
+					<div class="col-md-6">
+						 <div class="form-group">
+						    <label class="control-label col-sm-2" for="desc">Name:</label>
+						    <div class="col-sm-6">
+						      	<input type="text" ng-model="spName" class="form-control" id="name" placeholder="Service Pack Name">
+						    </div>
+						 </div>
+						 <table class="table">
+				 	 		<tr>
+				 	 			<th>
+				 	 				<div class="btn-group" role="group" aria-label="...">
+										<button type="button" class="btn btn-sm btn-default"
+											ng-click="addPackage(-1)">
+											<i class="fa fa-plus"></i>
+										</button>
+										<button type="button" class="btn btn-sm btn-default"
+											ng-click="removePackage(-1)">
+											<i class="fa fa-minus"></i>
+										</button>
+									</div>
+								</th>
+				 	 			<th>Package Name</th>
+				 	 		</tr>
+				 	 		<tr ng-repeat="package in packages">
+				 	 			<td width="78px">
+									<div class="btn-group" role="group" aria-label="...">
+										<button type="button" class="btn btn-sm btn-default"
+											ng-click="addPackage($index)">
+											<i class="fa fa-plus"></i>
+										</button>
+										<button type="button" class="btn btn-sm btn-default"
+											ng-click="removePackage($index)">
+											<i class="fa fa-minus"></i>
+										</button>
+									</div>
+								</td>
+								<td>
+									<input type="text" class="form-control input-sm" ng-model="package.packageName"/>
+								</td>
+				 	 		</tr>
+				 	 	</table>
+						 	<p>&nbsp;</p>
+							<h4>Upload Packages</h4>
+							<div flow-init="{target: '/upload-package'}"
+							     flow-files-submitted="$flow.upload()"
+							     flow-file-added="handleFileAdd($file, $event, $flow)"
+							     flow-file-success="$file.msg = $message">
+							  
+							  <div class="alert alert-warning dropzone" flow-drop>
+								    Drag And Drop your file here or click upload button <span class="btn btn-primary" flow-btn>Upload File</span>
+							  </div>
+							  <table class="table table-striped">
+							    <tr ng-repeat="file in $flow.files">
+							        <td>{{$index+1}}</td>
+							        <td>{{file.name}}</td>
+							        <td>{{file.msg}}</td>
+							        <td><button class="btn btn-sm btn-primary" ng-click="deleteFromServer($flow.files, file)"><i class="fa fa-times"></i></button></td>
+							    </tr>
+							  </table>
+							</div>
+							<div>
+								<button ng-click="createServicePack()" class="btn btn-primary">Create Service Pack</button>
+							</div>
+						 
+						 
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,20 @@
+<div class="row">
+	<div class="container">
+		<h2 style="color: #bf3e11">General Settings</h2>
+		<hr />
+
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<table class="table">
+					<tr><th>Setting Name</th><th>Property</th><th>Action</th></tr>
+					<tr ng-repeat="setting in settings">
+						<td ng-bind="setting.name"/>
+						<td><input class="form-control input-sm" ng-model="setting.property"/></td>
+						<td><button class="btn btn-primary btn-sm" ng-click="updateSetting(setting)">Save</button></td>
+					</tr>
+				</table>
+			
+			</div>
+		</div>
+	</div>
+</div>

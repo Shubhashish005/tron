@@ -1,0 +1,53 @@
+<div class="row">
+	<div class="container">
+		<h2 style="color: #bf3e11">Compare Environments</h2>
+		<hr />
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="panel panel-default">
+				<div class="panel-body" ng-init="tab = 1">
+				<div class="row">
+				<div class="col-lg-12">
+					<form class="form-inline">
+					  <div class="form-group">
+					    <label for="email">Source:</label>
+					    <select ng-model="sourceE" class="form-control" name="sourceE"	ng-options="x.envName for x in sourceEnvList"></select>
+					  </div>
+					  <div class="form-group">
+					    <label for="pwd">Target:</label>
+					    <select ng-model="targetE" class="form-control" name="targetE"	ng-options="x.envName for x in targetEnvList"></select>
+					  </div>
+					  <button type="compare" ng-click="compareEnv()" class="btn btn-danger">Compare <i class="fa fa-random"></i></button>
+					  <input type="text" ng-model="quickfilter" class="form-control pull-right" placeholder="Quick Search"/>
+					</form>
+					<br/>
+				</div>
+				</div>
+				<div class="row" ng-show="sourcePackages.length > 0">
+					<div class="col-lg-6">
+						<div class="panel panel-default">
+							<div class="panel-heading">Source [{{sourceE.envName}}]</div>
+							<div class="panel-body">
+								<ul class="list-group">
+									<li ng-repeat="package in sourcePackages | filter:quickfilter" class="list-group-item" ng-class="{'list-group-item-success': package.status == '+', 'list-group-item-danger': package.status == '-'}" ng-bind="package.item"/>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-6">
+						<div class="panel panel-default">
+							<div class="panel-heading">Target [{{targetE.envName}}]</div>
+							<div class="panel-body">
+								<ul class="list-group">
+									<li ng-repeat="package in sourcePackages | filter:quickfilter" class="list-group-item" ng-class="{'list-group-item-success': package.status == '-', 'list-group-item-danger': package.status == '+'}" ng-bind="package.item"/>
+								</ul>
+							</div>
+						</div>					
+					</div>
+					</div>
+				</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

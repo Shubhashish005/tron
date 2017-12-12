@@ -1,0 +1,142 @@
+<style>
+ ul[dnd-list] {
+    min-height: 42px;
+    padding-left: 0px;
+}
+
+/**
+ * The dndDraggingSource class will be applied to
+ * the source element of a drag operation. It makes
+ * sense to hide it to give the user the feeling
+ * that he's actually moving it.
+ */
+ ul[dnd-list] .dndDraggingSource {
+    display: none;
+}
+
+
+</style>
+
+<div class="row">
+	<div class="container">
+		<h2 style="color: #bf3e11">Users</h2>
+		<hr />
+
+		<div class="panel panel-default">
+
+			<div class="panel-body">
+				<input type="button" class="btn btn-primary pull-right"
+					ng-click="addUser()" value="Add User"
+					style="margin-bottom: 20px;">
+
+				<table class="table table-striped" style="table-layout:fixed; width:100%;">
+					<tr>
+						<th>User Name</th>
+						<th>GUID</th>
+						<th>Employee ID</th>
+						<th>Email ID</th>
+						<th>Roles</th>
+						<th class="text-right">Action</th>
+					</tr>
+					</tr>
+					<tr ng-repeat="user in users">
+						<td>{{user.givenName}}</td>
+						<td>{{user.guid}}</td>
+						<td>{{user.employeeId}}</td>
+						<td>{{user.email}}</td>
+						<td><div style="word-break:break-all;"><span style="margin-right: 2px; white-space:normal"
+							class="label label-success"
+							ng-repeat="role in user.roles">{{role.name}}</span></div>
+						</td>
+						<td>
+						
+							<div class="btn-group pull-right" role="group" aria-label="...">
+								<button type="button" class="btn btn-default btn-sm"
+									ng-click="deleteUser(user)">
+									<i class="fa fa-trash"></i>
+								</button>
+								<button type="button" class="btn btn-default btn-sm"
+									ng-click="updateUser(user)">
+									<i class="fa fa-list-alt"></i>
+								</button>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<div class="modal fade" id="myModal" role="dialog">
+			<div class="modal-dialog modal-md">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class="modal-title">Configure User Roles</h4>
+					</div>
+					<div class="modal-body">
+						<form class="form-horizontal" role="form">
+
+							<div class="form-group">
+								<label class="control-label col-sm-4" for="email">GUID</label>
+								<div class="col-sm-8">
+									<input type="text" class="form-control" name="a" id="a"
+										ng-model="user.guid" placeholder="GUID">
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-lg-12">
+									<div class="col-lg-6">
+										<div class="panel panel-default">
+											<!-- Default panel contents -->
+											<div class="panel-heading">Available Roles</div>
+												<ul dnd-list="permissions" class="list-group">
+													<!-- The dnd-draggable directive makes an element draggable and will
+									         transfer the object that was assigned to it. If an element was
+									         dragged away, you have to remove it from the original list
+									         yourself using the dnd-moved attribute -->
+													<li class="list-group-item"
+														ng-repeat="item in roles | filter:availableRoles"
+														dnd-draggable="item"
+														dnd-moved="roles.splice($index, 1)"
+														dnd-effect-allowed="move"
+														dnd-selected="models.selected = item"
+														ng-class="{'selected': models.selected === item}">
+														{{item.name}}</li>
+												</ul>
+											</div>
+									</div>
+									<div class="col-lg-6">
+										<div class="panel panel-default">
+											<!-- Default panel contents -->
+											<div class="panel-heading">Assigned Roles</div>
+												<ul dnd-list="user.roles" class="list-group">
+													<!-- The dnd-draggable directive makes an element draggable and will
+									         transfer the object that was assigned to it. If an element was
+									         dragged away, you have to remove it from the original list
+									         yourself using the dnd-moved attribute -->
+													<li class="list-group-item"
+														ng-repeat="item in user.roles" dnd-draggable="item" dnd-disable-if="true"
+														dnd-moved="user.roles.splice($index, 1)"
+														dnd-effect-allowed="move"
+														dnd-selected="models.selected = item"
+														ng-class="{'selected': models.selected === item}">
+														{{item.name}} <span ng-click="user.roles.splice($index, 1)"><i style="font-size: 16px;" class="fa fa-times text-danger"></i></span>
+													</li>
+												</ul>
+											</div>
+									</div>
+
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-info" ng-click="saveUser()">Save</button>
+							</div>
+
+						</form>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

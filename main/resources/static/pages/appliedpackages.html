@@ -1,0 +1,40 @@
+<div class="row">
+	<div class="container">
+		<h4 style="color: #bf3e11">Applied Packages</h4>
+		<hr />
+
+		<div class="panel panel-default">
+			<div class="panel-body" ng-init="tab = 1">
+				<div class="col-md-4">
+					<div class="form-group row">
+						<label class="control-label col-sm-4" for="env">Environment:</label>
+						<div class="col-sm-6">
+							<select ng-model="env" class="form-control" name="env"
+								ng-change="setEnv(x)"
+								ng-options="x.envName for x in environments"></select>
+						</div>
+					</div>
+					<div class="row">
+					<div class="panel panel-default">
+					    <div class="panel-heading"><input type="text" class="form-control input-sm" ng-model="search" placeholder="Search"/></div>
+						<div class="panel-body"	style="min-height: 400px; max-height: 400px; overflow: scroll">
+							<div js-tree="treeConfig" ng-model="treeModelPackage"
+								should-apply="applyModelChanges()" tree="treeInstancePackage"
+								tree-events="ready:readyCB;select_node:selectPackageNodeCB"></div>
+						</div>
+					</div>
+					</div>
+				</div>
+				<div class="col-md-8 text-left">
+				
+					<!-- div hljs include="'compile-me'" compile="true" language="java"></div-->
+					<script type="text/ng-template" id="compile-me"> {{sourcecode}} </script>
+					
+					<pre style="max-height:600px;overflow:scroll;"><code ng-bind-html="sourcecode | highlight:lang | unsafe" class="java"></code></pre>
+					 
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

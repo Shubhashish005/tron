@@ -37,6 +37,16 @@ tronApp.controller('UserController', function($scope, $http, toastr){
 		$scope.users = data;
 	});
 	
+	$scope.deleteUser = function(user) {
+		 $scope.user = user;
+		 $http.post('/users/delete', $scope.user).success(function(data, status, header){
+			 toastr.success('User Deleted!', 'Alert!');
+				$http.get('/users').success(function(data, status){
+					$scope.users = data;
+				});
+		 });
+	}
+	
 	$scope.saveUser = function(){
 		$http.post('/users', $scope.user).success(function(data, status, header){
 			$('#myModal').modal('toggle');
@@ -105,6 +115,8 @@ tronApp.controller('RolesController', function($scope, $http, toastr){
 			toastr.error(data.message, 'Alert!');
 		});
 	};
+	
+	
 	
 	$scope.updateRole = function(role) {
 		$scope.role = role;
